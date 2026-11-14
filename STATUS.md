@@ -10,7 +10,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | blocked | Backend done incl. `mast_m` (#13). Only deploy left | `main` | Yes: needs a Render/Railway account to deploy | Sat 11:54 |
 | B | Frontend | in review | Full UI on the real API in PR #11; waiting on deploy URL + stale masks | `frontend/ui` (PR #11) | Partly: see B section | Sat 11:55 |
-| C (Lucas) | Terrain horizon masks | working | Sun/Earth check + README limitations merged (#14); waiting on A for Malapert point; final README at 6:00 | `claude/project-thread-mabu61` | No | Sat 12:03 |
+| C (Lucas) | Terrain horizon masks | working | Haworth point is outside its official region (#15); waiting on A to move haworth + malapert_massif | `claude/project-thread-mabu61` | Waiting on A (2 coordinates) | Sat 12:07 |
 
 ---
 
@@ -46,15 +46,18 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 ## C: terrain horizon masks (Lucas)
 
 - **Status:** working
-- **Current task:** waiting on A's decision on the Malapert point; then final README + submission prep (6:00)
+- **Current task:** waiting on A to move haworth + malapert_massif (below); then final README + submission prep (6:00)
 - **Branch / PR:** `claude/project-thread-mabu61`. #12 and [#14](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/14) merged
 - **Done so far:** all polar masks + `_h10` mast masks on `main`, matching `sites.json`; map backdrop for B; **Sun/Earth check** (`terrain/sun_earth_check.py`, results in `terrain/validate.md` §4): connecting ridge 100% sunlit, terrain <= flat except on high points; **README "Limitations" section** added
 - **Answer for A:** the negative masks at nobile_rim_1 (−5.9° at az 107) and mons_mouton_plateau (−4.4° at az 205) are real: the ground drops ~4 km within 10 km into a basin toward the pole, and stays 4–7° below level out to 150 km with curvature. Profiles in `terrain/validate.md` §4. Caveat: nobile_rim_1's ground is 5,846 m, the Mons Mouton massif's height, so that point may sit on the massif rather than Nobile's rim (Quickmap check)
 - **"Explain it" text:** B already wrote it (`Explain.tsx` in PR #11) and it reads well; C won't duplicate it
 - **Next:** rebuild masks if A moves Malapert; Quickmap screenshot (needs Lucas); final README + submission at 6:00
 - **Blocked on:** nothing
-- **Needs from others:** **A: move `malapert_massif` to −86.0187, 2.2013.** The current point sits in a ~300 m crater on the summit (Sun 26%, Earth 43% with terrain); 1.6 km away it is 100% Sun / 50% Earth. Optional smaller nudges for mons_mouton and peak_near_cabeus_b in `terrain/suggested_points.md`. Ping C after and C rebuilds the masks (~10 s)
-- **Updated:** Sat 12:03 ET
+- **Needs from others:** **A: please update 2 points in `sites.json`, refetch their Horizons cache, and ping C:**
+  1. **`haworth` → −86.9737, 335.6129.** Quickmap's official Haworth region outline (screenshot in `terrain/validate.md` §5) shows the current point −87.9994, 337.4768 is ~60 km *outside* the region. The new point is the best one inside it (mean horizon ~0°, slope 4.5°). It moves ~115 km, so the cache must be refetched. (#15)
+  2. **`malapert_massif` → −86.0187, 2.2013.** The current point sits in a ~300 m summit crater (Sun 26%, Earth 43% with terrain); 1.6 km away is 100% / 50%.
+  C rebuilds the masks within minutes of the change.
+- **Updated:** Sat 12:07 ET
 
 ---
 
@@ -62,6 +65,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:07 · C · Quickmap check: Haworth point is ~60 km outside the official region (#15). Asking A to move haworth and malapert_massif.
 - Sat 12:03 · C · #14 merged: Sun/Earth check of masks (ridge 100% sunlit; A's negative-mask question answered: real), README Limitations. Asking A to move Malapert 1.6 km out of a summit crater.
 - Sat 11:54 · A · Terrain gate passes on C's rebuilt masks. `mast_m` merged (#13), slider unblocked for B. Only deploy left; waiting on a hosting account.
 - Sat 11:53 · C · #12 merged: 4 masks rebuilt for the moved sites, 10 m mast masks for all sites, map backdrop for B. A and B no longer waiting on C.
