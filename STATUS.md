@@ -10,7 +10,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | done | Backend live and current (masks #18). Available for fixes | `main` | No | Sat 12:17 |
 | B | Frontend | done | Site live: https://siphrn.github.io/nasaSpaceAppChallenge/ ; demo video recorded | `main` | No | Sat 12:18 |
-| C (Lucas) | Terrain horizon masks | working | All masks current (#18); Quickmap checks done (#19); next: final README + submission at 6:00 | `claude/project-thread-mabu61` | No | Sat 12:10 |
+| C (Lucas) | Terrain + README/submission | working | README front page merged (#22); drafting submission text | `claude/project-thread-mabu61` | No | Sat 12:30 |
 
 ---
 
@@ -42,13 +42,13 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 ## C: terrain horizon masks (Lucas)
 
 - **Status:** working
-- **Current task:** nothing blocking anyone. Next: final README + submission prep (6:00)
+- **Current task:** drafting the Space Apps submission text (`docs/submission.md`); README front page done
 - **Branch / PR:** `claude/project-thread-mabu61`. #12, #14, #15, #18, #19 merged
 - **Done so far:** all 10 polar masks + `_h10` mast masks on `main` match `sites.json` (haworth and malapert_massif rebuilt for A's #17 in **#18**). Map backdrop for B. Sun/Earth check (`terrain/validate.md` §4: ridge 100% sunlit; Malapert now 100% Sun / 50% Earth with terrain). Quickmap checks (§5): Haworth now inside its official region; Nobile Rim 1 inside its region. README "Limitations" section
-- **Next:** final README (screenshot/GIF, how it works, data sources, limitations, how to run) and submission checklist at 6:00; rebuild masks if any coordinate changes
+- **Next:** submission text; Lucas submits on the Space Apps page by 8:00
 - **Blocked on:** nothing
-- **Needs from others:** A: rerun the terrain gate on the 2 rebuilt masks (#18). Anyone: tell C if a site moves (C rebuilds in ~10 s). B: live app URL when the frontend is deployed (for the README)
-- **Updated:** Sat 12:10 ET
+- **Needs from others:** **B: demo video** — please upload it to YouTube as *unlisted* (the Space Apps form takes a link) and put the link in your STATUS section; C adds it to the README and submission. If it's under ~20 MB, also commit it as `docs/demo.mp4` so the README can link it. Everyone: open the README on GitHub and say if anything is wrong
+- **Updated:** Sat 12:30 ET
 
 ---
 
@@ -56,6 +56,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:30 · C · #22 merged: README front page for judges (live links, 2 app screenshots, how it works, run locally) + MIT LICENSE; build plan kept as an appendix. Asked B to upload the demo video unlisted to YouTube.
 - Sat 12:21 · C · Pages is on (Lucas set Source: GitHub Actions). Workflow run #3 succeeded; site: https://siphrn.github.io/nasaSpaceAppChallenge/ . Also merged B's #20 (demo caption fix).
 - Sat 12:18 · B · Frontend live at https://siphrn.github.io/nasaSpaceAppChallenge/ (Pages run #3 green). Lane B done.
 - Sat 12:17 · A · Redeployed backend with #17/#18 (Render doesn't redeploy on push; docs fixed in #21). Terrain gate passes on the live URL. Lane A done.
