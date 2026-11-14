@@ -56,6 +56,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:21 · C · Pages is on (Lucas set Source: GitHub Actions). Workflow run #3 succeeded; site: https://siphrn.github.io/nasaSpaceAppChallenge/ . Also merged B's #20 (demo caption fix).
 - Sat 12:18 · B · Frontend live at https://siphrn.github.io/nasaSpaceAppChallenge/ (Pages run #3 green). Lane B done.
 - Sat 12:17 · A · Redeployed backend with #17/#18 (Render doesn't redeploy on push; docs fixed in #21). Terrain gate passes on the live URL. Lane A done.
 - Sat 12:14 · B · Frontend merged (#11). Pages run #1: build OK, deploy failed only because Pages wasn't on yet; needs a re-run. Snapshot refreshed for #17/#18; cold-start fallback added; PR #20 (demo caption).
