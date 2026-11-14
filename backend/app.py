@@ -43,18 +43,29 @@ def _range(start, stop, step_h):
     return a, b
 
 
-def _mask(site_id, horizon):
-    """(mask_deg or None, horizon actually used). Falls back to flat if no file."""
+def _load_mask(path):
+    if not path.exists():
+        return None
+    m = json.loads(path.read_text())
+    mask = m.get("mask_deg") or []
+    if not mask or len(mask) != m.get("n_az", len(mask)):
+        return None
+    return mask
+
+
+def _mask(site_id, horizon, mast_m=0):
+    """(mask_deg or None, horizon used, mast_m used).
+    Terrain falls back to flat if there is no mask file; a mast mask falls back to the 0 m mask."""
     if horizon == "flat":
-        return None, "flat"
-    p = MASKS / f"{site_id}.json"
-    if not p.exists():
-        return None, "flat"
-    m = json.loads(p.read_text())
-    mask = m["mask_deg"]
-    if len(mask) != m.get("n_az", len(mask)) or not mask:
-        return None, "flat"
-    return mask, "terrain"
+        return None, "flat", 0
+    if mast_m:
+        mask = _load_mask(MASKS / f"{site_id}_h{mast_m}.json")
+        if mask is not None:
+            return mask, "terrain", mast_m
+    mask = _load_mask(MASKS / f"{site_id}.json")
+    if mask is None:
+        return None, "flat", 0
+    return mask, "terrain", 0
 
 
 def _track(site, a, b, step_h):
@@ -72,8 +83,8 @@ def _track(site, a, b, step_h):
     return sun, earth
 
 
-def _ephemeris(site, a, b, step_h, horizon):
-    mask, used = _mask(site["id"], horizon)
+def _ephemeris(site, a, b, step_h, horizon, mast_m=0):
+    mask, used, mast_used = _mask(site["id"], horizon, mast_m)
     sun, earth = _track(site, a, b, step_h)
     times = [r[0] for r in sun]
 
@@ -88,6 +99,7 @@ def _ephemeris(site, a, b, step_h, horizon):
         "stop": b.strftime(horizons.ISO),
         "step_h": step_h,
         "horizon": used,
+        "mast_m": mast_used,
         "times": times,
         "sun": body(sun),
         "earth": body(earth),
@@ -107,10 +119,11 @@ def get_ephemeris(
     stop: str,
     step_h: int = 1,
     horizon: str = Query("flat", pattern="^(flat|terrain)$"),
+    mast_m: int = Query(0, ge=0, le=100),
 ):
     s = _site(site)
     a, b = _range(start, stop, step_h)
-    return _ephemeris(s, a, b, step_h, horizon)
+    return _ephemeris(s, a, b, step_h, horizon, mast_m)
 
 
 @app.get("/compare")
@@ -121,6 +134,7 @@ def get_compare(
     step_h: int = 1,
     horizon: str = Query("flat", pattern="^(flat|terrain)$"),
     land_at: str | None = None,
+    mast_m: int = Query(0, ge=0, le=100),
 ):
     ids = [x.strip() for x in sites.split(",") if x.strip()]
     if not ids:
@@ -139,13 +153,13 @@ def get_compare(
 
     results = []
     for s in chosen:
-        e = _ephemeris(s, a, b, step_h, horizon)
+        e = _ephemeris(s, a, b, step_h, horizon, mast_m)
         times = e["times"]
         idx = 0
         if land_iso:
             idx = next((i for i, t in enumerate(times) if t >= land_iso), len(times) - 1)
         m = metrics.summarize(times, e["sun"]["el"], e["sun"]["visible"], e["earth"]["visible"], step_h, idx)
-        results.append({"site": s["id"], "name": s["name"], "horizon": e["horizon"], **m})
+        results.append({"site": s["id"], "name": s["name"], "horizon": e["horizon"], "mast_m": e["mast_m"], **m})
 
     return {
         "start": a.strftime(horizons.ISO),
