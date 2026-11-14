@@ -1,6 +1,4 @@
-fastapi
-uvicorn
-requests
-numpy
-pytest
-httpx
+fastapi==0.162.7
+uvicorn==0.54.0
+requests==2.34.2
+numpy==2.5.3
