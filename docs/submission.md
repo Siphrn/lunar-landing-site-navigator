@@ -13,7 +13,7 @@ At the Moon's south pole the Sun never rises more than a few degrees. It circles
 ## Project Demonstration
 
 **Rule: a video of 30 seconds or less, or at most 7 slides, at a public link with no login.**
-A 29.5-second video recorded from the real app, with captions (numbers are read off the page, so they match the data):
+A 29-second video recorded from the real app, with captions (numbers are read off the page, so they match the data):
 
 https://github.com/Siphrn/nasaSpaceAppChallenge/blob/main/docs/demo.mp4
 
