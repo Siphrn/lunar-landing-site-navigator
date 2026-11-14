@@ -15,7 +15,7 @@ At the Moon's south pole the Sun never rises more than a few degrees. It circles
 **Rule: a video of 30 seconds or less, or at most 7 slides, at a public link with no login.**
 A 29-second video recorded from the real app, with captions (numbers are read off the page, so they match the data):
 
-https://github.com/Siphrn/nasaSpaceAppChallenge/blob/main/docs/demo.mp4
+https://github.com/Siphrn/lunar-landing-site-navigator/blob/main/docs/demo.mp4
 
 It is regenerated with `node docs/record_demo_30s.cjs` (see the file header). B's longer ~69 s walkthrough can go in Project Details as an extra if wanted.
 
@@ -23,7 +23,7 @@ It is regenerated with `node docs/record_demo_30s.cjs` (see the file header). B'
 
 https://siphrn.github.io/lunar-landing-site-navigator/
 
-(Code: https://github.com/Siphrn/nasaSpaceAppChallenge. The live app links to the repo, and the repo README links to the app.)
+(Code: https://github.com/Siphrn/lunar-landing-site-navigator. The live app links to the repo, and the repo README links to the app.)
 
 ## Project Details
 
