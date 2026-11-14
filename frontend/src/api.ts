@@ -1,8 +1,9 @@
 // The only file that talks to the backend.
 //
 // Where data comes from, in order:
-//  1. VITE_API_URL set  -> the live API. If it can't be reached (network error or 5xx) and the
-//                          dates are inside the offline snapshot, answer from the snapshot instead.
+//  1. VITE_API_URL set  -> the live API. If it can't be reached (network error, 5xx, or no answer
+//                          within LIVE_TIMEOUT_MS, e.g. a free server waking up) and the dates are
+//                          inside the offline snapshot, answer from the snapshot instead.
 //  2. no VITE_API_URL   -> the offline snapshot of real API answers (src/snapshot/), if present.
 //  3. neither           -> the fake files in src/mock/ (development only; dates ignored).
 import { covers, HAS_SNAPSHOT, snapCompare, snapEphemeris, snapshotSites } from "./snapshot";
@@ -26,13 +27,17 @@ async function mock<T>(name: string): Promise<T> {
   return structuredClone((await load()) as T);
 }
 
+/** How long to wait for the live API before answering from the snapshot (if it can). */
+const LIVE_TIMEOUT_MS = 6000;
+
 /** Thrown for answers the server gave on purpose (4xx): never hidden by the snapshot. */
 class ApiError extends Error {}
 
 async function get<T>(path: string, params: Record<string, string | number | undefined> = {}): Promise<T> {
   const url = new URL(BASE + path);
   for (const [k, v] of Object.entries(params)) if (v !== undefined) url.searchParams.set(k, String(v));
-  const res = await fetch(url);
+  // Only time out when the snapshot can step in; otherwise wait as long as the server needs.
+  const res = await fetch(url, HAS_SNAPSHOT ? { signal: AbortSignal.timeout(LIVE_TIMEOUT_MS) } : undefined);
   if (!res.ok) {
     let detail = res.statusText;
     try {
@@ -48,17 +53,39 @@ async function get<T>(path: string, params: Record<string, string | number | und
 
 /** Try the live API; on a network/server failure fall back to the snapshot when it can answer. */
 async function liveOrSnapshot<T>(live: () => Promise<T>, snap: () => Promise<T>, q?: RangeQuery): Promise<T> {
+  // The server already failed and is still waking up: don't make the user wait again.
+  if (liveDown && HAS_SNAPSHOT && (!q || (await covers(q)))) {
+    wakeUp();
+    lastSource = "snapshot";
+    return snap();
+  }
   try {
     const out = await live();
     lastSource = "live";
     return out;
   } catch (e) {
     if (e instanceof ApiError || !HAS_SNAPSHOT || (q && !(await covers(q)))) throw e;
-    console.warn("Live API unavailable, using the offline snapshot:", e);
+    console.warn("Live API unavailable or slow, using the offline snapshot:", e);
+    liveDown = true;
+    wakeUp();
     const out = await snap();
     lastSource = "snapshot";
     return out;
   }
+}
+
+/** Keep poking a sleeping server in the background, so the next request is live again. */
+let liveDown = false;
+let waking = false;
+function wakeUp() {
+  if (waking || !BASE) return;
+  waking = true;
+  fetch(`${BASE}/sites`) // no timeout: give a sleeping free server time to start
+    .then((r) => {
+      if (r.ok) liveDown = false; // back up: the next Compare uses live data again
+    })
+    .catch(() => undefined)
+    .finally(() => (waking = false));
 }
 
 /** Contract 3 */

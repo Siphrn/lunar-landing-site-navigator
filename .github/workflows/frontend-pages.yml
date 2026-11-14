@@ -1,8 +1,8 @@
 # Builds frontend/ and publishes it to GitHub Pages on every push to main.
 # One-time setup (repo admin): Settings -> Pages -> Build and deployment -> Source: "GitHub Actions".
-# When the backend is deployed: Settings -> Secrets and variables -> Actions -> Variables ->
-#   New repository variable VITE_API_URL = https://<backend-host>  (then re-run this workflow).
-# Without VITE_API_URL the site answers from the offline snapshot in frontend/src/snapshot/.
+# The site calls lane A's deployed backend (below). To point it elsewhere, set the repository
+# variable VITE_API_URL (Settings -> Secrets and variables -> Actions -> Variables) and re-run.
+# If the backend is down or slow to wake, the site answers from frontend/src/snapshot/.
 name: Frontend to GitHub Pages
 
 on:
@@ -38,7 +38,7 @@ jobs:
       - run: npm run build
         env:
           VITE_BASE: /${{ github.event.repository.name }}/
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_API_URL: ${{ vars.VITE_API_URL || 'https://lunar-site-navigator-api.onrender.com' }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
