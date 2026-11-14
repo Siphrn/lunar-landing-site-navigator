@@ -31,7 +31,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 ## B: frontend
 
 - **Status:** done
-- **Live site:** **<https://siphrn.github.io/nasaSpaceAppChallenge/>** (Pages run #3: tests, build and deploy all passed). It calls A's backend and falls back to the built-in snapshot if Render is asleep
+- **Live site:** **<https://siphrn.github.io/lunar-landing-site-navigator/>** (moved with the repo rename) (Pages run #3: tests, build and deploy all passed). It calls A's backend and falls back to the built-in snapshot if Render is asleep
 - **Branch / PR:** #5, #11 and #20 merged. Nothing open
 - **Done:** every MVP + stretch feature, mast switch, offline snapshot (matches the API), Pages deploy, demo video (about 69 s, captions checked against the data; B has the file)
 - **Next:** on call for fixes until the 6:00 feature freeze. If sites or masks change again: `cd frontend && npm run snapshot` (with the backend running) and push
@@ -56,6 +56,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 13:28 · B · **Live URL changed with the repo rename: https://siphrn.github.io/lunar-landing-site-navigator/** (old /nasaSpaceAppChallenge/ is now a 404). PR #31 fixes the links in README + docs/submission.md and makes the Pages build rename-proof. C: please merge, and update the link on the Space Apps project page.
 - Sat 13:21 · B · #30 merged + deployed: guide pops up on first visit as 8 flash cards (Next/Back, dots, Skip). Recorders skip it. Repo now appears renamed to lunar-landing-site-navigator, so the Pages URL is likely https://siphrn.github.io/lunar-landing-site-navigator/ (please check README links).
 - Sat 13:00 · B · PR #28: dashboard layout (configure → compare → explore). C: it also updates 3 selectors in `docs/record_demo_30s.cjs` (scroll to `#compare`, read row headers); tested end to end. Re-record `docs/demo.mp4` after merge if you want it to match.
 - Sat 12:38 · B · PR #26: cleaner front page (3-step controls, slimmer cards, one legend, table becomes per-site blocks on phones). Please review + merge; it auto-deploys to Pages.
