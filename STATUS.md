@@ -10,7 +10,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | done | Flat + terrain backend merged (PR #7); next: help B switch to the real API | `main` | No | Sat 11:37 |
 | B | Frontend | working | Site/date picker + sky plot on mock data | `frontend/scaffold` (PR #5), `frontend/ui` | No | Sat 11:25 |
-| C (Lucas) | Terrain horizon masks | in review | Masks rebuilt with A's site list, PR #4 | `claude/project-thread-mabu61` | No | Sat 11:41 |
+| C (Lucas) | Terrain horizon masks | working | Masks merged (#4); validation + better site points for A | — | No | Sat 11:46 |
 
 ---
 
@@ -40,14 +40,14 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 ## C: terrain horizon masks (Lucas)
 
-- **Status:** in review
-- **Current task:** masks for all 10 polar sites, rebuilt from A's `sites.json` (PR #6); PR #4 needs a review
-- **Branch / PR:** `claude/project-thread-mabu61` ([PR #4](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/4))
-- **Done so far:** ray-caster with curvature on the 80 m/px LOLA DEM; masks keyed by A's IDs in `backend/data/masks/`; direction checks pass (see `terrain/validate.md`)
-- **Next:** Quickmap screenshot check; optional 10 m mast masks; rerun if A changes coordinates
+- **Status:** working
+- **Current task:** masks merged to `main` ([PR #4](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/4)); next is validation against Quickmap and the Sun/Earth sanity check
+- **Branch / PR:** next work on `claude/project-thread-mabu61`
+- **Done so far:** masks for all 10 polar sites in `backend/data/masks/`, keyed by `sites.json` IDs; ray-caster, build script, plot tool, tests (see `terrain/validate.md`); better nearby points for 4 sites in `terrain/suggested_points.md`
+- **Next:** Quickmap screenshot check; Sun/Earth sanity check once `/ephemeris` works; optional 10 m mast masks; rerun masks if A changes coordinates
 - **Blocked on:** nothing
-- **Needs from others:** A: some points sit in craters or on steep slopes (haworth is on Haworth's crater floor, permanently dark; mons_mouton_plateau, nobile_rim_1, de_gerlache_rim_2 sit on 23-26° slopes). Consider nudging them onto the rim/plateau top. Someone: review PR #4
-- **Updated:** Sat 11:41 ET
+- **Needs from others:** A: read `terrain/suggested_points.md` (haworth is on a crater floor and never sunlit; 3 other points sit on 23-26° slopes) and decide on new coordinates. A: `backend/data/masks/{id}.json` is ready for `horizon=terrain`
+- **Updated:** Sat 11:46 ET
 
 ---
 
@@ -55,6 +55,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 11:46 · C · PR #4 (terrain masks) and PR #5 (B's frontend scaffold) merged to `main` at Lucas's request.
 - Sat 11:37 · A · Backend merged to main (PR #7). The flat-horizon API is ready for B; terrain reads C's masks once they're on main.
 - Sat 11:35 · A · sites.json merged to main (PR #6). Backend with flat + terrain API done on `backend/lane-a-workflow`; works offline.
 - Sat 11:41 · C · Masks rebuilt with A's site IDs/coords from PR #6 (PR #4). Flagged 4 points that sit in craters or on steep slopes.
