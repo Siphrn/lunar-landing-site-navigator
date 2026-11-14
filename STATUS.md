@@ -8,7 +8,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
-| A | Data and backend | blocked | `horizons.py` (sites.json + metrics done on branch) | `backend/lane-a-workflow` | Yes: Horizons host blocked in cloud env | Sat 11:27 |
+| A | Data and backend | working | `horizons.py` + cache; `sites.json` in PR #6 | `backend/sites` (PR #6), `backend/lane-a-workflow` | No | Sat 11:30 |
 | B | Frontend | working | Site/date picker + sky plot on mock data | `frontend/scaffold` (PR #5), `frontend/ui` | No | Sat 11:25 |
 | C (Lucas) | Terrain horizon masks | in review | First masks for all sites (placeholder coords), PR #4 open | `claude/project-thread-mabu61` | Waiting on A's `sites.json` | Sat 11:26 |
 
@@ -16,14 +16,14 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 ## A: data and backend
 
-- **Status:** blocked (partly)
+- **Status:** working
 - **Current task:** `horizons.py` fetch + cache
-- **Branch / PR:** `backend/lane-a-workflow` (not merged to main yet)
-- **Done so far:** `backend/data/sites.json` (12 sites, passes gate; some coordinates approximate, flagged in `note`), `requirements.txt`, `metrics.py` + tests (pytest green)
+- **Branch / PR:** `backend/sites` (PR #6, sites.json, ready for review); `backend/lane-a-workflow` (metrics.py + tests)
+- **Done so far:** `sites.json` (12 sites, IDs final), `requirements.txt`, `metrics.py` + tests (pytest green). Horizons is reachable now and a test query works
 - **Next:** `horizons.py` + cache, then `app.py` endpoints
-- **Blocked on:** `ssd.jpl.nasa.gov` is not reachable from the cloud dev environment; cache must be filled from a machine with network access, or the host allowed
-- **Needs from others:** C: site IDs are in `sites.json` on the branch; please sanity-check coordinates in Quickmap if you have it open
-- **Updated:** Sat 11:27 ET
+- **Blocked on:** nothing
+- **Needs from others:** a quick review of PR #6; C, the site IDs there are final, but please check coordinates in Quickmap
+- **Updated:** Sat 11:30 ET
 
 ---
 
@@ -55,6 +55,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 11:30 · A · Unblocked: Horizons is reachable. sites.json PR #6 open, IDs final.
 - Sat 11:27 · A · sites.json (12 sites) and metrics.py + tests done on `backend/lane-a-workflow`; blocked on Horizons network access.
 - Sat 11:26 · C · First masks for all polar sites (placeholder coords) and direction checks done; PR #4 open. Waiting on A's `sites.json` for final masks.
 - Sat 11:25 · B · Frontend scaffold, contract types, mocks and `api.ts` done; PR #5 open. Starting picker + sky plot.
