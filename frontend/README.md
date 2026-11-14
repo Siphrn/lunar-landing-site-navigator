@@ -63,3 +63,13 @@ python frontend/scripts/make_basemap.py terrain/dem/LDEM_80S_80MPP_ADJ.TIF
 It writes `frontend/public/basemap/south_pole.png` (about 300 KB) and `south_pole.json` (its extent). The map
 uses them automatically if they exist. Sites are placed with the DEM's own projection
 (`+proj=stere +lat_0=-90 +lon_0=0 +R=1737400`, see `src/geo.ts`), so the image and markers line up.
+
+## Demo video
+
+`scripts/record_demo.cjs` records the ~65 s demo from the root README (sites → sky domes playing → flat vs terrain →
+two-week slip → best landing window) with on-screen captions. Captions that quote numbers read them off the page,
+so they stay true when the data changes. Needs Playwright with Chromium, plus ffmpeg for the .mp4.
+
+```bash
+node scripts/record_demo.cjs https://<owner>.github.io/nasaSpaceAppChallenge/ demo
+```
