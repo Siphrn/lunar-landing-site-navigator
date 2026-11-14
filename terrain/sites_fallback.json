@@ -1,0 +1,13 @@
+[
+  {"id": "shackleton_ridge", "name": "Shackleton connecting ridge", "lat": -89.45, "lon_e": 222.69, "group": "other", "note": "PLACEHOLDER coords until backend/data/sites.json exists"},
+  {"id": "haworth", "name": "Haworth", "lat": -86.9, "lon_e": 357.0, "group": "candidate", "note": "PLACEHOLDER"},
+  {"id": "malapert", "name": "Malapert Massif", "lat": -85.99, "lon_e": 2.93, "group": "candidate", "note": "PLACEHOLDER"},
+  {"id": "mons_mouton_plateau", "name": "Mons Mouton Plateau", "lat": -85.4, "lon_e": 35.0, "group": "candidate", "note": "PLACEHOLDER"},
+  {"id": "mons_mouton", "name": "Mons Mouton", "lat": -84.5, "lon_e": 31.2, "group": "candidate", "note": "PLACEHOLDER"},
+  {"id": "nobile_rim_1", "name": "Nobile Rim 1", "lat": -84.3, "lon_e": 58.0, "group": "candidate", "note": "PLACEHOLDER"},
+  {"id": "nobile_rim_2", "name": "Nobile Rim 2", "lat": -85.9, "lon_e": 37.0, "group": "candidate", "note": "PLACEHOLDER"},
+  {"id": "de_gerlache_rim_2", "name": "de Gerlache Rim 2", "lat": -88.4, "lon_e": 290.0, "group": "candidate", "note": "PLACEHOLDER"},
+  {"id": "cabeus_b_peak", "name": "Peak near Cabeus B", "lat": -82.3, "lon_e": 307.0, "group": "candidate", "note": "PLACEHOLDER"},
+  {"id": "slater_plain", "name": "Slater Plain", "lat": -88.4, "lon_e": 110.0, "group": "candidate", "note": "PLACEHOLDER"},
+  {"id": "apollo11", "name": "Apollo 11 (control)", "lat": 0.674, "lon_e": 23.473, "group": "control", "note": "Near-equator control site"}
+]
