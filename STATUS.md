@@ -10,7 +10,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | blocked | Backend done incl. `mast_m` (#13). Only deploy left | `main` | Yes: needs a Render/Railway account to deploy | Sat 11:54 |
 | B | Frontend | in review | Full UI on the real API in PR #11; waiting on deploy URL + stale masks | `frontend/ui` (PR #11) | Partly: see B section | Sat 11:55 |
-| C (Lucas) | Terrain horizon masks | working | Masks rebuilt for moved sites + 10 m mast masks + map backdrop merged (#12); next: Sun/Earth check, README limitations, Explain-it text | `claude/project-thread-mabu61` | No | Sat 11:53 |
+| C (Lucas) | Terrain horizon masks | working | Sun/Earth check + README limitations merged (#14); waiting on A for Malapert point; final README at 6:00 | `claude/project-thread-mabu61` | No | Sat 12:03 |
 
 ---
 
@@ -46,13 +46,15 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 ## C: terrain horizon masks (Lucas)
 
 - **Status:** working
-- **Current task:** Sun/Earth sanity check of the masks with A's cache; then README limitations section and "Explain it" text
-- **Branch / PR:** `claude/project-thread-mabu61`. [#12](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/12) merged
-- **Done so far:** all 10 polar masks on `main` match the current `sites.json` (4 moved sites rebuilt in #12). `{site}_h10.json` (10 m mast) for every polar site. Map backdrop `frontend/public/basemap/` made from the DEM (for B; I block-averaged the full-res DEM because `Resampling.average` on the COG drew a tile grid. B: consider the same change in `make_basemap.py`)
-- **Next:** Sun/Earth check; README limitations; "Explain it" text (will put it in `docs/explain_it.md` for B to drop into the panel); final README + submission prep at 6:00
+- **Current task:** waiting on A's decision on the Malapert point; then final README + submission prep (6:00)
+- **Branch / PR:** `claude/project-thread-mabu61`. #12 and [#14](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/14) merged
+- **Done so far:** all polar masks + `_h10` mast masks on `main`, matching `sites.json`; map backdrop for B; **Sun/Earth check** (`terrain/sun_earth_check.py`, results in `terrain/validate.md` §4): connecting ridge 100% sunlit, terrain <= flat except on high points; **README "Limitations" section** added
+- **Answer for A:** the negative masks at nobile_rim_1 (−5.9° at az 107) and mons_mouton_plateau (−4.4° at az 205) are real: the ground drops ~4 km within 10 km into a basin toward the pole, and stays 4–7° below level out to 150 km with curvature. Profiles in `terrain/validate.md` §4. Caveat: nobile_rim_1's ground is 5,846 m, the Mons Mouton massif's height, so that point may sit on the massif rather than Nobile's rim (Quickmap check)
+- **"Explain it" text:** B already wrote it (`Explain.tsx` in PR #11) and it reads well; C won't duplicate it
+- **Next:** rebuild masks if A moves Malapert; Quickmap screenshot (needs Lucas); final README + submission at 6:00
 - **Blocked on:** nothing
-- **Needs from others:** A: rerun the terrain gate on the new masks. A + B: mast slider is a yes from C: the `_h10` files are on `main`, same format as contract 2 with `site_height_m: 10`. Tell C if any site's coordinates change again (C reruns masks in ~10 s)
-- **Updated:** Sat 11:53 ET
+- **Needs from others:** **A: move `malapert_massif` to −86.0187, 2.2013.** The current point sits in a ~300 m crater on the summit (Sun 26%, Earth 43% with terrain); 1.6 km away it is 100% Sun / 50% Earth. Optional smaller nudges for mons_mouton and peak_near_cabeus_b in `terrain/suggested_points.md`. Ping C after and C rebuilds the masks (~10 s)
+- **Updated:** Sat 12:03 ET
 
 ---
 
@@ -60,6 +62,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:03 · C · #14 merged: Sun/Earth check of masks (ridge 100% sunlit; A's negative-mask question answered: real), README Limitations. Asking A to move Malapert 1.6 km out of a summit crater.
 - Sat 11:54 · A · Terrain gate passes on C's rebuilt masks. `mast_m` merged (#13), slider unblocked for B. Only deploy left; waiting on a hosting account.
 - Sat 11:53 · C · #12 merged: 4 masks rebuilt for the moved sites, 10 m mast masks for all sites, map backdrop for B. A and B no longer waiting on C.
 - Sat 11:55 · B · Full frontend on the real API in PR #11 (MVP + window finder, scrubber, map). Waiting on: C to rebuild 4 stale masks + make the map backdrop; A's deployed URL.
