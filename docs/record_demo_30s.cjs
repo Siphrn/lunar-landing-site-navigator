@@ -1,8 +1,9 @@
 // 30-second demo for the Space Apps submission (the form allows a video of 30 s or less).
 // A shorter cut of frontend/scripts/record_demo.cjs: same story, captions read the real numbers off the page.
-//   node docs/record_demo_30s.cjs [app URL] [output dir]
+//   node docs/record_demo_30s.cjs [app URL] [output dir] [music.wav]
 // e.g. cd frontend && npm run build && npx vite preview --port 4173   (then, in another shell)
 //      node docs/record_demo_30s.cjs http://localhost:4173/ demo
+// Optional music: python docs/compose_demo_music.py demo/ambient.wav, then pass demo/ambient.wav as the 3rd argument.
 // Needs Playwright (with Chromium) and ffmpeg. Writes demo.webm (raw) and demo_30s.mp4 (page-load trimmed, <= 29.5 s).
 const { chromium } = require("playwright");
 const { execFileSync } = require("node:child_process");
@@ -11,6 +12,7 @@ const path = require("node:path");
 
 const URL_ = process.argv[2] || "http://localhost:4173/";
 const OUT = path.resolve(process.argv[3] || "demo");
+const MUSIC = process.argv[4] ? path.resolve(process.argv[4]) : null;
 const W = 1280, H = 720;
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -38,8 +40,9 @@ const phrase = (body, cell) =>
         el.id = "demo-caption";
         el.style.cssText =
           "position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:9999;max-width:80%;" +
-          "background:rgba(15,23,42,.88);color:#fff;font:600 20px/1.35 system-ui,sans-serif;padding:12px 20px;" +
-          "border-radius:12px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.25);transition:opacity .3s";
+          "background:rgba(15,23,42,.5);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);color:#fff;" +
+          "font:600 20px/1.35 system-ui,sans-serif;padding:12px 20px;text-shadow:0 1px 3px rgba(0,0,0,.7);" +
+          "border-radius:12px;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.12);transition:opacity .3s";
         document.body.appendChild(el);
       }
       el.style.opacity = t ? "1" : "0";
@@ -136,7 +139,10 @@ const phrase = (body, cell) =>
   fs.renameSync(await video.path(), webm);
   console.log("wrote", webm);
   const mp4 = path.join(OUT, "demo_30s.mp4");
-  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-ss", String(START), "-t", "29.5", "-i", webm,
+  const audio = MUSIC
+    ? ["-i", MUSIC, "-map", "0:v", "-map", "1:a", "-af", "volume=-6dB,afade=t=out:st=27:d=2.5", "-c:a", "aac", "-b:a", "160k", "-shortest"]
+    : [];
+  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-ss", String(START), "-t", "29.5", "-i", webm, ...audio,
     "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "23", "-movflags", "+faststart", mp4]);
   console.log("wrote", mp4);
 })();
