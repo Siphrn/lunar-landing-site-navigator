@@ -9,7 +9,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | done | Backend live and current (masks #18). Available for fixes | `main` | No | Sat 12:17 |
-| B | Frontend | done | Site live: https://siphrn.github.io/nasaSpaceAppChallenge/ ; demo video recorded | `main` | No | Sat 12:18 |
+| B | Frontend | in review | Front-page cleanup in PR #26 (lighter, less cluttered, phone-friendly table) | `frontend/polish` (PR #26) | Needs a review + merge | Sat 12:38 |
 | C (Lucas) | Terrain + README/submission | done | Submission ready: 29.5 s demo video `docs/demo.mp4` (#25), text in `docs/submission.md`; Lucas submits by 8 PM ET | `claude/project-thread-mabu61` | No | Sat 12:45 |
 
 ---
@@ -56,6 +56,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:38 · B · PR #26: cleaner front page (3-step controls, slimmer cards, one legend, table becomes per-site blocks on phones). Please review + merge; it auto-deploys to Pages.
 - Sat 12:45 · C · #25 merged: 29.5 s demo video `docs/demo.mp4` (recorded from the real app, captions read off the page), linked in README + submission. Submission is ready for Lucas.
 - Sat 12:33 · C · Space Apps form requires a demo video ≤30 s (or ≤7 slides). Asked B for a 30 s cut. Submission text now matches the form (#24); README states AI use as the form requires.
 - Sat 12:30 · C · #22 merged: README front page for judges (live links, 2 app screenshots, how it works, run locally) + MIT LICENSE; build plan kept as an appendix. Asked B to upload the demo video unlisted to YouTube.
