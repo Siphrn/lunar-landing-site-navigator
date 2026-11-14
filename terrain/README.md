@@ -18,9 +18,9 @@ python terrain/tests/test_synthetic.py   # fake-Moon tests (no download needed)
 python terrain/tests/test_crosscheck.py  # real DEM, two independent methods agree
 ```
 
-Sites come from `backend/data/sites.json` (Person A). Until that exists, the
-script uses `terrain/sites_fallback.json`, whose coordinates are rough
-placeholders. Rerun the script once A's file lands.
+Sites come from `backend/data/sites.json` (Person A). If that file is missing,
+the script uses `terrain/sites_fallback.json`, a copy of A's list from PR #6.
+Whenever A changes coordinates, rerun the script and commit the new masks.
 
 ## The data
 
