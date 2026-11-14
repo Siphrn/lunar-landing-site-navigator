@@ -1,0 +1,4 @@
+numpy
+rasterio
+pyproj
+matplotlib  # only for plot_mask.py
