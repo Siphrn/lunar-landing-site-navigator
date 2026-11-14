@@ -19,6 +19,7 @@ Every response is cached in data/cache/ (committed), and any cached window that
 covers a request is sliced, so the demo never calls Horizons live.
 """
 import json
+import os
 import pathlib
 from datetime import datetime, timedelta, timezone
 
@@ -28,6 +29,8 @@ API = "https://ssd.jpl.nasa.gov/api/horizons.api"
 CACHE = pathlib.Path(__file__).resolve().parent / "data" / "cache"
 BODIES = {"sun": "10", "earth": "399"}
 ISO = "%Y-%m-%dT%H:%M:%SZ"
+# HORIZONS_OFFLINE=1: never call Horizons, serve the cache only (use for the deployed demo).
+OFFLINE = os.environ.get("HORIZONS_OFFLINE", "") not in ("", "0")
 
 
 class HorizonsError(RuntimeError):
@@ -118,7 +121,7 @@ def _from_cache(site_id, body, start, stop, step_h):
     return None
 
 
-def azel(site, body, start, stop, step_h=1, offline=False):
+def azel(site, body, start, stop, step_h=1, offline=None):
     """site = {'id','lat','lon_e'}; body 'sun'|'earth'; start/stop datetimes or date strings.
     Returns [(iso_time, az_deg, el_deg), ...] from start to stop inclusive."""
     if body not in BODIES:
@@ -132,6 +135,8 @@ def azel(site, body, start, stop, step_h=1, offline=False):
     hit = _from_cache(site["id"], body, start, stop, step_h)
     if hit is not None:
         return hit
+    if offline is None:
+        offline = OFFLINE
     if offline:
         raise HorizonsError(f"no cached ephemeris for {site['id']}/{body} {start:%Y-%m-%d}..{stop:%Y-%m-%d}")
     rows = fetch(site, body, start, stop, step_h)
