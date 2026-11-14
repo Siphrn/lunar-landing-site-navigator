@@ -54,8 +54,8 @@ const phrase = (body, cell) =>
       const i = heads.findIndex((t) => t.startsWith(h));
       const out = {};
       for (const tr of document.querySelectorAll("table tbody tr")) {
-        const td = tr.querySelectorAll("td");
-        out[td[0].textContent.replace(/flat|ground/g, "").trim()] = td[i].textContent.trim();
+        const td = tr.querySelectorAll("th, td"); // site name is the row header
+        out[td[0].textContent.replace(/flat|ground/g, "").trim()] = td[i].textContent.replace("(best)", "").trim(); // drop the screen-reader-only marker
       }
       return out;
     }, header);
@@ -69,7 +69,7 @@ const phrase = (body, cell) =>
   const START = (Date.now() - T0) / 1000; // seconds of page load to trim off
   await caption("A launch slips two weeks. Is our lunar south-pole landing site still viable?");
   await wait(3000);
-  await scrollTo("h2", 10);
+  await scrollTo("#compare", 10);
   await caption("Compare sites: hours of sunlight for power, Earth in view for radio, longest night");
   await wait(3000);
   await scrollTo(".cards", 120);
@@ -85,13 +85,13 @@ const phrase = (body, cell) =>
   await page.evaluate(() => window.scrollTo({ top: 0 }));
   await page.getByRole("button", { name: "Flat horizon" }).click();
   await settle();
-  await scrollTo("h2", 10);
+  await scrollTo("#compare", 10);
   const flatBoth = await column("% Sun + Earth");
   await wait(1200);
   await page.evaluate(() => window.scrollTo({ top: 0 }));
   await page.getByRole("button", { name: "Terrain horizon" }).click();
   await settle();
-  await scrollTo("h2", 10);
+  await scrollTo("#compare", 10);
   const pct = (t) => parseFloat(t);
   const site = Object.keys(terrainBoth).sort(
     (a, b) => Math.abs(pct(flatBoth[b]) - pct(terrainBoth[b])) - Math.abs(pct(flatBoth[a]) - pct(terrainBoth[a])),
@@ -102,7 +102,7 @@ const phrase = (body, cell) =>
   // shift the dates by two weeks; captions read the real numbers off the page
   const firstRow = () =>
     page.evaluate(() => {
-      const cells = [...document.querySelectorAll("table tbody tr:first-child td")].map((td) => td.textContent.trim());
+      const cells = [...document.querySelectorAll("table tbody tr:first-child th, table tbody tr:first-child td")].map((td) => td.textContent.replace("(best)", "").trim());
       return { name: cells[0], sunset: cells[cells.length - 2], earthset: cells[cells.length - 1] };
     });
   const before = await firstRow();
@@ -116,7 +116,7 @@ const phrase = (body, cell) =>
   await wait(400);
   await page.click("button[type=submit]");
   await settle();
-  await scrollTo("h2", 10);
+  await scrollTo("#compare", 10);
   const after = await firstRow();
   await caption(`Land on Dec 29 instead: ${phrase("the Sun", after.sunset)} and ${phrase("Earth", after.earthset)}`);
   await wait(3500);

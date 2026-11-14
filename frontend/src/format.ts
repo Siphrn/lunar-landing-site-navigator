@@ -25,13 +25,31 @@ export type MetricKey = keyof Pick<
   "pct_sunlit" | "longest_dark_h" | "pct_earth" | "longest_blackout_h" | "pct_both" | "max_sun_el_deg"
 >;
 
-export const METRIC_COLUMNS: { key: MetricKey; label: string; better: "high" | "low"; fmt: (v: number) => string }[] = [
-  { key: "pct_sunlit", label: "% sunlit", better: "high", fmt: (v) => `${v}%` },
-  { key: "longest_dark_h", label: "Longest night", better: "low", fmt: hours },
-  { key: "pct_earth", label: "% Earth", better: "high", fmt: (v) => `${v}%` },
-  { key: "longest_blackout_h", label: "Longest blackout", better: "low", fmt: hours },
-  { key: "pct_both", label: "% Sun + Earth", better: "high", fmt: (v) => `${v}%` },
-  { key: "max_sun_el_deg", label: "Peak Sun", better: "high", fmt: (v) => `${v}°` },
+/** Which colour family a metric belongs to: sunlight (power), Earth (radio), or both at once. */
+export type Category = "sun" | "earth" | "both";
+
+export interface MetricColumn {
+  key: MetricKey;
+  label: string;
+  cat: Category;
+  better: "high" | "low";
+  fmt: (v: number) => string;
+  /** How full the cell's bar is (0–1). `periodH` is the length of the compared period in hours. */
+  bar: (v: number, periodH: number, colMax: number) => number;
+}
+
+const share = (v: number) => v / 100;
+const ofPeriod = (v: number, periodH: number) => (periodH > 0 ? v / periodH : 0);
+const ofMax = (v: number, _p: number, colMax: number) => (colMax > 0 ? Math.max(0, v) / colMax : 0);
+
+/** Grouped by colour: sunlight columns, then Earth columns, then the overlap. */
+export const METRIC_COLUMNS: MetricColumn[] = [
+  { key: "pct_sunlit", label: "% sunlit", cat: "sun", better: "high", fmt: (v) => `${v}%`, bar: share },
+  { key: "longest_dark_h", label: "Longest night", cat: "sun", better: "low", fmt: hours, bar: ofPeriod },
+  { key: "max_sun_el_deg", label: "Peak Sun", cat: "sun", better: "high", fmt: (v) => `${v}°`, bar: ofMax },
+  { key: "pct_earth", label: "% Earth", cat: "earth", better: "high", fmt: (v) => `${v}%`, bar: share },
+  { key: "longest_blackout_h", label: "Longest blackout", cat: "earth", better: "low", fmt: hours, bar: ofPeriod },
+  { key: "pct_both", label: "% Sun + Earth", cat: "both", better: "high", fmt: (v) => `${v}%`, bar: share },
 ];
 
 /** Best value per column across the rows (only meaningful with 2+ rows). */

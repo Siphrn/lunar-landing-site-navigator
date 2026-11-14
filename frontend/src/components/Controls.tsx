@@ -57,17 +57,25 @@ export default function Controls({
 
   return (
     <form
-      className="controls panel"
+      className="controls"
+      aria-labelledby="configure-title"
       onSubmit={(e) => {
         e.preventDefault();
         if (canSubmit) onSubmit();
       }}
     >
-      <fieldset className="step sites">
+      <h2 id="configure-title" className="flow-title">
+        <span className="step-n" aria-hidden="true">
+          1
+        </span>
+        Configure
+      </h2>
+
+      <fieldset className="block sites">
         <legend>
-          <span className="step-n">1</span> Choose sites
-          <span className="step-hint">
-            {draft.sites.length} of {MAX_SITES} picked
+          Sites
+          <span className="hint">
+            {draft.sites.length}/{MAX_SITES} selected
           </span>
         </legend>
         {groups.map(({ g, items }) => (
@@ -96,11 +104,11 @@ export default function Controls({
         ))}
       </fieldset>
 
-      <fieldset className="step">
+      <fieldset className="block">
         <legend>
-          <span className="step-n">2</span> Pick dates <span className="step-hint">UTC</span>
+          Dates <span className="hint">UTC</span>
         </legend>
-        <div className="fields">
+        <div className="date-grid">
           <label>
             From
             <input
@@ -121,7 +129,7 @@ export default function Controls({
               onChange={(e) => onDraft({ ...draft, stop: e.target.value })}
             />
           </label>
-          <label className="wide">
+          <label className="span-2">
             Landing time
             <input
               type="datetime-local"
@@ -132,58 +140,57 @@ export default function Controls({
         </div>
       </fieldset>
 
-      <fieldset className="step">
+      <fieldset className="block">
         <legend>
-          <span className="step-n">3</span> Assumptions <span className="step-hint">apply instantly</span>
+          Assumptions <span className="hint">apply instantly</span>
         </legend>
-        <div className="fields">
-          <div className="seg" role="group" aria-label="Horizon">
-            {(["terrain", "flat"] as Horizon[]).map((h) => (
-              <button
-                type="button"
-                key={h}
-                className={draft.horizon === h ? "on" : ""}
-                aria-pressed={draft.horizon === h}
-                onClick={() => onHorizon(h)}
-              >
-                {h === "terrain" ? "Terrain horizon" : "Flat horizon"}
-              </button>
-            ))}
-          </div>
-          <div
-            className="seg"
-            role="group"
-            aria-label="Mast height"
-            title={
-              draft.horizon === "flat"
-                ? "Mast height only matters with the terrain horizon"
-                : "Panels and antenna on a mast see over nearby terrain"
-            }
-          >
-            {[0, 10].map((m) => (
-              <button
-                type="button"
-                key={m}
-                className={draft.mastM === m ? "on" : ""}
-                aria-pressed={draft.mastM === m}
-                disabled={draft.horizon === "flat"}
-                onClick={() => onMast(m)}
-              >
-                {m === 0 ? "On the ground" : "10 m mast"}
-              </button>
-            ))}
-          </div>
+        <div className="seg full" role="group" aria-label="Horizon">
+          {(["terrain", "flat"] as Horizon[]).map((h) => (
+            <button
+              type="button"
+              key={h}
+              className={draft.horizon === h ? "on" : ""}
+              aria-pressed={draft.horizon === h}
+              onClick={() => onHorizon(h)}
+            >
+              {h === "terrain" ? "Terrain horizon" : "Flat horizon"}
+            </button>
+          ))}
+        </div>
+        <div
+          className="seg full"
+          role="group"
+          aria-label="Mast height"
+          title={
+            draft.horizon === "flat"
+              ? "Mast height only matters with the terrain horizon"
+              : "Panels and antenna on a mast see over nearby terrain"
+          }
+        >
+          {[0, 10].map((m) => (
+            <button
+              type="button"
+              key={m}
+              className={draft.mastM === m ? "on" : ""}
+              aria-pressed={draft.mastM === m}
+              disabled={draft.horizon === "flat"}
+              onClick={() => onMast(m)}
+            >
+              {m === 0 ? "On the ground" : "10 m mast"}
+            </button>
+          ))}
         </div>
       </fieldset>
 
       <div className="submit-row">
-        {rangeBad ? (
-          <p className="error">The end date must be after the start date.</p>
-        ) : (
-          <p className="step-hint">{dirty ? "Press Compare to update the results." : ""}</p>
+        {rangeBad && (
+          <p className="error" role="alert">
+            The end date must be after the start date.
+          </p>
         )}
+        {!rangeBad && dirty && <p className="pending">Sites or dates changed</p>}
         <button type="submit" className="primary" disabled={!canSubmit}>
-          {loading ? "Loading…" : "Compare"}
+          {loading ? "Loading…" : "Compare sites"}
         </button>
       </div>
     </form>
