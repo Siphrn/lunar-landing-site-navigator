@@ -1,4 +1,39 @@
 {
-  "_source": "Quickmap layer 'A3: Candidate landing regions 2022', polygon vertices (lat, lon_e) copied from the Object Inspector (screenshot terrain/img/quickmap_haworth_region.png)",
-  "haworth": [[-86.11240, 333.34804], [-86.44277, 347.63822], [-87.39353, 343.00918], [-86.95784, 325.01815]]
+  "_source": "Quickmap layer 'A3: Candidate landing regions 2022', polygon vertices (lat, lon_e) copied from the Object Inspector (screenshots in terrain/img/quickmap_*_region.png)",
+  "haworth": [
+    [
+      -86.1124,
+      333.34804
+    ],
+    [
+      -86.44277,
+      347.63822
+    ],
+    [
+      -87.39353,
+      343.00918
+    ],
+    [
+      -86.95784,
+      325.01815
+    ]
+  ],
+  "nobile_rim_1": [
+    [
+      -85.35325,
+      31.66075
+    ],
+    [
+      -84.97628,
+      38.07278
+    ],
+    [
+      -85.47632,
+      43.22853
+    ],
+    [
+      -85.89922,
+      36.50144
+    ]
+  ]
 }
