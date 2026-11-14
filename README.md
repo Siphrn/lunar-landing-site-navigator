@@ -618,6 +618,25 @@ def summarize(sun_vis, earth_vis, step_h=1):
 | Network flaky during judging | Demo hangs on an API call | Cache everything; ship a `demo_cache/` so the deployed app never calls Horizons live |
 | Overclaiming accuracy | Judges ask "how accurate is this?" | Have a limitations line ready: hourly sampling, DEM resolution, single surface point (no mast height), no libration modelling beyond Horizons |
 
+## Limitations
+
+What the numbers do and don't capture. Use this to answer "how accurate is this?"
+
+**Terrain (horizon masks)**
+
+- **Map resolution is 80 m per pixel.** Hills and crater rims tens of km away, which block most of the low polar Sun, are well resolved. Features smaller than a few hundred metres are smoothed out, and boulders are not in the map at all. The 20 m map (2.6 GB) would sharpen the nearby terrain; the code takes it unchanged.
+- **One exact point per site.** NASA's candidate regions are roughly 15 × 15 km; each site here is a single point we chose inside one. At the pole, moving 1–2 km can change sunlight a lot (for example, a point in a 300 m crater on top of Malapert sees the Sun 26% of the time; a point 1.6 km away sees it 100%). That sensitivity is the app's message, but it means our numbers describe our points, not whole regions.
+- **The horizon starts 160 m out.** The first two pixels mostly describe the slope you stand on, so they are skipped, as if the lander sits on levelled ground.
+- **Rays go out to 150 km.** Beyond that, the Moon's curvature hides terrain more than 6.5 km tall, which is taller than nearly anything at the pole. The map stops at about 80°S, so for the northernmost site (Peak near Cabeus B) rays toward the equator end early (about 80% of the ray length in the worst direction).
+- **Mast heights are 0 m and 10 m only.**
+
+**Sun and Earth**
+
+- **Positions come from JPL Horizons, hourly.** A sunset or Earthset is placed to the nearest hour.
+- **We test the centre of the Sun and of Earth.** The Sun is half a degree wide, so near the horizon it can be partly visible for a while; we count it as up when its centre clears the terrain. There is no atmosphere, so no refraction correction is needed.
+- **Dates are cached for 17 Nov 2026 to 14 Jan 2027** so the demo works offline. Other dates need a live Horizons call. This period is southern summer at the pole, so some sites are sunlit 100% of it; in winter the same sites get much less.
+- **Earth visibility means line of sight only.** It ignores antenna pointing, relay satellites and the ground stations on Earth.
+
 ## Demo, submission and resume
 
 **60-second demo script**

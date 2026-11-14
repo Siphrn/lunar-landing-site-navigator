@@ -29,3 +29,13 @@ python terrain/suggest_sites.py de_gerlache_rim_2
 python terrain/suggest_sites.py nobile_rim_1 --radius-km 10 --step-km 0.5
 python terrain/suggest_sites.py haworth --radius-km 30 --step-km 1.5
 ```
+
+## Second round (Sat 12:00 ET): Malapert
+
+| Site | Current point | Problem | Suggested point (lat, lon_e) | Moved | Mean / max horizon | Slope |
+| --- | --- | --- | --- | --- | --- | --- |
+| malapert_massif | −86.00, 2.90 | In a ~300 m summit crater: mean horizon 5.0°, Sun 26%, Earth 43% | −86.0187, 2.2013 | 1.6 km | −0.79° / 3.67° | 2.3° |
+
+Smaller optional nudges (near-field bumps only, less impact):
+mons_mouton → −85.2826, 32.0576 (1.4 km, mean 1.61° → −0.62°);
+peak_near_cabeus_b → −83.5753, 291.5338 (1.5 km, mean 0.60° → −1.55°).
