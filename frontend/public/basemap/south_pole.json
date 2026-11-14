@@ -1,0 +1,11 @@
+{
+  "image": "south_pole.png",
+  "x_min_m": -240000,
+  "x_max_m": 240000,
+  "y_min_m": -240000,
+  "y_max_m": 240000,
+  "proj": "+proj=stere +lat_0=-90 +lon_0=0 +R=1737400",
+  "source": "LDEM_80S_80MPP_ADJ.TIF",
+  "credit": "LOLA south-pole DEM, NASA PGDA (Barker et al. 2021)",
+  "generated_at": "2026-11-14T16:50:59Z"
+}
