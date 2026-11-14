@@ -31,7 +31,7 @@ The test fires 40 random queries at both the live API and the snapshot and check
 
 `.github/workflows/frontend-pages.yml` builds and publishes on every push to `main` that touches `frontend/`.
 One-time setup by a repo admin: **Settings → Pages → Source: GitHub Actions**. The site is then at
-`https://<owner>.github.io/nasaSpaceAppChallenge/`. When the backend is live, add the repository variable
+`https://<owner>.github.io/<repo-name>/` (currently https://siphrn.github.io/lunar-landing-site-navigator/). When the backend is live, add the repository variable
 **`VITE_API_URL`** (Settings → Secrets and variables → Actions → Variables) and re-run the workflow.
 
 ## Files
@@ -71,5 +71,5 @@ two-week slip → best landing window) with on-screen captions. Captions that qu
 so they stay true when the data changes. Needs Playwright with Chromium, plus ffmpeg for the .mp4.
 
 ```bash
-node scripts/record_demo.cjs https://<owner>.github.io/nasaSpaceAppChallenge/ demo
+node scripts/record_demo.cjs https://siphrn.github.io/lunar-landing-site-navigator/ demo
 ```

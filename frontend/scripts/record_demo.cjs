@@ -1,6 +1,6 @@
 // Records the ~60 s demo from the README ("Demo, submission and resume") with on-screen captions.
 //   node scripts/record_demo.cjs [app URL] [output dir]
-// e.g. node scripts/record_demo.cjs https://<owner>.github.io/nasaSpaceAppChallenge/ demo
+// e.g. node scripts/record_demo.cjs https://siphrn.github.io/lunar-landing-site-navigator/ demo
 // Needs Playwright (with Chromium). Writes demo.webm, and demo.mp4 if ffmpeg is installed.
 const { chromium } = require("playwright");
 const { execFileSync } = require("node:child_process");

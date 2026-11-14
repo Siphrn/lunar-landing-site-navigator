@@ -21,7 +21,7 @@ It is regenerated with `node docs/record_demo_30s.cjs` (see the file header). B'
 
 ## Project
 
-https://siphrn.github.io/nasaSpaceAppChallenge/
+https://siphrn.github.io/lunar-landing-site-navigator/
 
 (Code: https://github.com/Siphrn/nasaSpaceAppChallenge. The live app links to the repo, and the repo README links to the app.)
 
