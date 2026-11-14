@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import type { Data } from "plotly.js";
 import Plot from "../Plot";
 import { COLORS } from "../format";
+import { THEME } from "../theme";
 import type { EphemerisResponse } from "../types";
 
 /**
@@ -60,7 +61,7 @@ export default function SkyPlot({ eph, markIndex, zoom }: Props) {
       theta: [...azs, ...azs.slice().reverse()],
       r: [...maskR, ...azs.map(() => outer)],
       fill: "toself",
-      fillcolor: "rgba(139,107,74,0.35)",
+      fillcolor: THEME.terrainFill,
       line: { color: COLORS.terrain, width: 1.5 },
       mode: "lines",
       name: eph.mask_deg ? "Terrain horizon" : "Flat horizon",
@@ -110,7 +111,7 @@ export default function SkyPlot({ eph, markIndex, zoom }: Props) {
         r: [90 - b.el[markIndex]],
         mode: "markers",
         marker: {
-          color: up ? color : "#ffffff",
+          color: up ? color : THEME.panel,
           size: 12,
           line: { color, width: 2.5 },
           symbol: key === "sun" ? "circle" : "diamond",
@@ -133,27 +134,31 @@ export default function SkyPlot({ eph, markIndex, zoom }: Props) {
             direction: "clockwise",
             tickvals: [0, 45, 90, 135, 180, 225, 270, 315],
             ticktext: ["N", "NE", "E", "SE", "S", "SW", "W", "NW"],
-            gridcolor: "#e3e6eb",
+            tickfont: { size: 11, color: THEME.muted },
+            linecolor: THEME.gridStrong,
+            gridcolor: THEME.grid,
           },
           radialaxis: {
             range: [inner, outer],
             tickvals: ticks,
             ticktext: ticks.map((t) => `${90 - t}°`),
             angle: 90,
+            linecolor: THEME.grid,
             tickangle: 90,
-            tickfont: { size: 9, color: "#6b7280" },
-            gridcolor: "#e3e6eb",
+            tickfont: { size: 9, color: THEME.faint },
+            gridcolor: THEME.grid,
           },
-          bgcolor: "#0f172a08",
+          bgcolor: THEME.sky,
         },
-        showlegend: true,
-        legend: { orientation: "h", y: -0.08, x: 0.5, xanchor: "center", font: { size: 11 } },
-        margin: { t: 24, l: 28, r: 28, b: 24 },
+        showlegend: false, // the page legend above the cards explains the colours
+        legend: { orientation: "h", y: -0.06, x: 0.5, xanchor: "center", font: { size: 11, color: THEME.muted } },
+        font: { family: THEME.font, color: THEME.muted },
+        margin: { t: 22, l: 28, r: 28, b: 14 },
         paper_bgcolor: "rgba(0,0,0,0)",
         autosize: true,
       }}
       useResizeHandler
-      style={{ width: "100%", height: 340 }}
+      style={{ width: "100%", height: 320 }}
       config={{ displayModeBar: false, responsive: true }}
     />
   );

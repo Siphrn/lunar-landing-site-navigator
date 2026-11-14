@@ -67,7 +67,7 @@ export default function Scrubber({
       </button>
       <div className="scrub-main">
         <div className="scrub-label">
-          <b>{fmtUtc(times[index])}</b>
+          <b>{fmtUtc(times[index], true)}</b>
           <span className="muted">
             day {(elapsedH / 24).toFixed(1)} of {((last * stepH) / 24).toFixed(0)}
           </span>

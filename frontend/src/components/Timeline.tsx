@@ -1,5 +1,6 @@
 import Plot from "../Plot";
 import { COLORS } from "../format";
+import { THEME } from "../theme";
 import type { EphemerisResponse } from "../types";
 
 interface Props {
@@ -51,8 +52,15 @@ export default function Timeline({ eph, landAt, cursor, onPick }: Props) {
       layout={{
         height: 140,
         margin: { t: 6, l: 46, r: 8, b: 40 },
-        xaxis: { type: "date", tickfont: { size: 10 }, fixedrange: true },
-        yaxis: { tickfont: { size: 11 }, fixedrange: true },
+        xaxis: {
+          type: "date",
+          tickfont: { size: 10, color: THEME.faint },
+          fixedrange: true,
+          showgrid: false,
+          zeroline: false,
+        },
+        yaxis: { tickfont: { size: 11, color: THEME.muted }, fixedrange: true },
+        font: { family: THEME.font, color: THEME.muted },
         shapes: [
           ...(landAt
             ? [
@@ -63,7 +71,7 @@ export default function Timeline({ eph, landAt, cursor, onPick }: Props) {
                   yref: "paper" as const,
                   y0: 0,
                   y1: 1,
-                  line: { color: "#111827", width: 2, dash: "dot" as const },
+                  line: { color: THEME.text, width: 1.5, dash: "dot" as const },
                 },
               ]
             : []),
@@ -76,7 +84,7 @@ export default function Timeline({ eph, landAt, cursor, onPick }: Props) {
                   yref: "paper" as const,
                   y0: -0.05,
                   y1: 1.05,
-                  line: { color: "#dc2626", width: 2 },
+                  line: { color: THEME.now, width: 2 },
                 },
               ]
             : []),

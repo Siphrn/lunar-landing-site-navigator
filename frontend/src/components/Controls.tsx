@@ -13,9 +13,9 @@ export interface Query {
 }
 
 const GROUP_LABEL: Record<SiteGroup, string> = {
-  candidate: "NASA candidate regions",
+  candidate: "Artemis candidate regions",
   other: "Other sites",
-  control: "Controls (near equator)",
+  control: "Non-polar controls",
 };
 
 interface Props {
@@ -63,11 +63,11 @@ export default function Controls({
         if (canSubmit) onSubmit();
       }}
     >
-      <fieldset className="sites">
+      <fieldset className="step sites">
         <legend>
-          Sites{" "}
-          <span className="muted">
-            ({draft.sites.length}/{MAX_SITES}, pick 2–4 to compare)
+          <span className="step-n">1</span> Choose sites
+          <span className="step-hint">
+            {draft.sites.length} of {MAX_SITES} picked
           </span>
         </legend>
         {groups.map(({ g, items }) => (
@@ -87,7 +87,7 @@ export default function Controls({
                     title={`${s.note} · ${s.lat.toFixed(2)}°, ${s.lon_e.toFixed(2)}°E`}
                     onClick={() => toggle(s.id)}
                   >
-                    {s.name}
+                    {s.name.replace(" (control)", "")}
                   </button>
                 );
               })}
@@ -96,76 +96,96 @@ export default function Controls({
         ))}
       </fieldset>
 
-      <div className="row">
-        <label>
-          From (UTC)
-          <input
-            type="date"
-            min={dateLimits?.min}
-            max={dateLimits?.max}
-            value={draft.start}
-            onChange={(e) => onDraft({ ...draft, start: e.target.value })}
-          />
-        </label>
-        <label>
-          To (UTC)
-          <input
-            type="date"
-            min={dateLimits?.min}
-            max={dateLimits?.max}
-            value={draft.stop}
-            onChange={(e) => onDraft({ ...draft, stop: e.target.value })}
-          />
-        </label>
-        <label>
-          Landing time (UTC)
-          <input
-            type="datetime-local"
-            value={draft.landAt}
-            onChange={(e) => onDraft({ ...draft, landAt: e.target.value })}
-          />
-        </label>
-        <div className="seg" role="group" aria-label="Horizon">
-          {(["terrain", "flat"] as Horizon[]).map((h) => (
-            <button
-              type="button"
-              key={h}
-              className={draft.horizon === h ? "on" : ""}
-              aria-pressed={draft.horizon === h}
-              onClick={() => onHorizon(h)}
-            >
-              {h === "terrain" ? "Terrain horizon" : "Flat horizon"}
-            </button>
-          ))}
+      <fieldset className="step">
+        <legend>
+          <span className="step-n">2</span> Pick dates <span className="step-hint">UTC</span>
+        </legend>
+        <div className="fields">
+          <label>
+            From
+            <input
+              type="date"
+              min={dateLimits?.min}
+              max={dateLimits?.max}
+              value={draft.start}
+              onChange={(e) => onDraft({ ...draft, start: e.target.value })}
+            />
+          </label>
+          <label>
+            To
+            <input
+              type="date"
+              min={dateLimits?.min}
+              max={dateLimits?.max}
+              value={draft.stop}
+              onChange={(e) => onDraft({ ...draft, stop: e.target.value })}
+            />
+          </label>
+          <label className="wide">
+            Landing time
+            <input
+              type="datetime-local"
+              value={draft.landAt}
+              onChange={(e) => onDraft({ ...draft, landAt: e.target.value })}
+            />
+          </label>
         </div>
-        <div
-          className="seg"
-          role="group"
-          aria-label="Mast height"
-          title={
-            draft.horizon === "flat"
-              ? "Mast height only matters with the terrain horizon"
-              : "Panels and antenna on a mast see over nearby terrain"
-          }
-        >
-          {[0, 10].map((m) => (
-            <button
-              type="button"
-              key={m}
-              className={draft.mastM === m ? "on" : ""}
-              aria-pressed={draft.mastM === m}
-              disabled={draft.horizon === "flat"}
-              onClick={() => onMast(m)}
-            >
-              {m === 0 ? "On the ground" : "10 m mast"}
-            </button>
-          ))}
+      </fieldset>
+
+      <fieldset className="step">
+        <legend>
+          <span className="step-n">3</span> Assumptions <span className="step-hint">apply instantly</span>
+        </legend>
+        <div className="fields">
+          <div className="seg" role="group" aria-label="Horizon">
+            {(["terrain", "flat"] as Horizon[]).map((h) => (
+              <button
+                type="button"
+                key={h}
+                className={draft.horizon === h ? "on" : ""}
+                aria-pressed={draft.horizon === h}
+                onClick={() => onHorizon(h)}
+              >
+                {h === "terrain" ? "Terrain horizon" : "Flat horizon"}
+              </button>
+            ))}
+          </div>
+          <div
+            className="seg"
+            role="group"
+            aria-label="Mast height"
+            title={
+              draft.horizon === "flat"
+                ? "Mast height only matters with the terrain horizon"
+                : "Panels and antenna on a mast see over nearby terrain"
+            }
+          >
+            {[0, 10].map((m) => (
+              <button
+                type="button"
+                key={m}
+                className={draft.mastM === m ? "on" : ""}
+                aria-pressed={draft.mastM === m}
+                disabled={draft.horizon === "flat"}
+                onClick={() => onMast(m)}
+              >
+                {m === 0 ? "On the ground" : "10 m mast"}
+              </button>
+            ))}
+          </div>
         </div>
+      </fieldset>
+
+      <div className="submit-row">
+        {rangeBad ? (
+          <p className="error">The end date must be after the start date.</p>
+        ) : (
+          <p className="step-hint">{dirty ? "Press Compare to update the results." : ""}</p>
+        )}
         <button type="submit" className="primary" disabled={!canSubmit}>
-          {loading ? "Loading…" : dirty ? "Compare" : "Compare ✓"}
+          {loading ? "Loading…" : "Compare"}
         </button>
       </div>
-      {rangeBad && <p className="error">The end date must be after the start date.</p>}
     </form>
   );
 }

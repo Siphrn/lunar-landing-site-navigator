@@ -23,8 +23,12 @@ export default function CompareTable({
                 <span className="better">{c.better === "high" ? "higher is better" : "lower is better"}</span>
               </th>
             ))}
-            <th>Sunset after landing</th>
-            <th>Earthset after landing</th>
+            <th>
+              Sunset in<span className="better">after landing</span>
+            </th>
+            <th>
+              Earthset in<span className="better">after landing</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -47,12 +51,12 @@ export default function CompareTable({
                   )}
               </td>
               {METRIC_COLUMNS.map((c) => (
-                <td key={c.key} className={best[c.key] === r[c.key] ? "best" : ""}>
+                <td key={c.key} data-label={c.label} className={best[c.key] === r[c.key] ? "best" : ""}>
                   {c.fmt(r[c.key])}
                 </td>
               ))}
-              <td>{untilSet(r.next_sunset_h)}</td>
-              <td>{untilSet(r.next_earthset_h)}</td>
+              <td data-label="Sunset in">{untilSet(r.next_sunset_h)}</td>
+              <td data-label="Earthset in">{untilSet(r.next_earthset_h)}</td>
             </tr>
           ))}
         </tbody>
