@@ -13,9 +13,11 @@ At the Moon's south pole the Sun never rises more than a few degrees. It circles
 ## Project Demonstration
 
 **Rule: a video of 30 seconds or less, or at most 7 slides, at a public link with no login.**
-B's current recording is about 69 s, too long for Global Award eligibility. B is cutting a 30-second version.
+A 29.5-second video recorded from the real app, with captions (numbers are read off the page, so they match the data):
 
-TODO: paste the link to the 30-second video (YouTube unlisted, or the file on GitHub).
+https://github.com/Siphrn/nasaSpaceAppChallenge/blob/main/docs/demo.mp4
+
+It is regenerated with `node docs/record_demo_30s.cjs` (see the file header). B's longer ~69 s walkthrough can go in Project Details as an extra if wanted.
 
 ## Project
 
