@@ -2,7 +2,7 @@
 
 The most likely bug in this project is a compass direction that is rotated or
 mirrored (the README warns about the polar-stereographic rotation sign). We
-checked it five ways. Status as of Sat 12:00 ET, using the site list on `main`.
+checked it six ways. Status as of Sat 12:00 ET, using the site list on `main`.
 
 ## 1. Fake Moon with known mountains: passed
 
@@ -112,10 +112,22 @@ What looked wrong, and why:
   **−86.0187, 2.2013** gives 100% Sun and 50% Earth over the same hours. Suggested
   to A in `suggested_points.md`.
 
-## 5. Still to do
+## 5. Quickmap: site points against the official region outlines
 
-- [ ] Quickmap screenshot: open https://quickmap.lroc.asu.edu at one site and
-      confirm the crater or massif our mask points at (needs a human, 5 min).
+Quickmap's "Candidate landing regions" layer gives each region's outline.
+Lucas checked Haworth (screenshot below, vertices saved in `regions.json`).
+Finding: our Haworth point had drifted ~60 km outside the region when we moved
+it off the crater floor onto the nearest open rim. `best_in_region.py` now picks
+the best point *inside* an outline; for Haworth that is −86.9737, 335.6129
+(mean horizon about 0°). The other regions still need their outlines checked.
+
+![Quickmap Haworth region](img/quickmap_haworth_region.png)
+
+## 6. Still to do
+
+- [x] Quickmap: Haworth region outline checked (section 5).
+- [ ] Region outlines for the other candidate sites (Malapert, Nobile Rim 1/2,
+      Mons Mouton, de Gerlache Rim 2, Slater Plain, Peak near Cabeus B).
 - [x] Sun/Earth check with A's cache (section 4). Ridge 100% sunlit; Malapert
       low only because of its exact point (fix suggested to A).
 - [x] Rerun with A's coordinates (PR #6). Several points still sit on steep
