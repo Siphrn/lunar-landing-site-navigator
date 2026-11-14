@@ -243,6 +243,7 @@ Conventions for all of them: times are UTC ISO-8601 strings (`"2026-12-01T00:00:
   "stop": "2026-12-31T00:00:00Z",
   "step_h": 1,
   "horizon": "terrain",
+  "mast_m": 0,
   "times": ["2026-12-01T00:00:00Z", "2026-12-01T01:00:00Z"],
   "sun":   { "az": [123.4, 124.0], "el": [1.2, 1.3], "visible": [false, true] },
   "earth": { "az": [355.1, 355.2], "el": [2.8, 2.8], "visible": [true, true] },
@@ -251,6 +252,8 @@ Conventions for all of them: times are UTC ISO-8601 strings (`"2026-12-01T00:00:
 ```
 
 `horizon` is `"flat"` or `"terrain"`. With `"flat"`, `mask_deg` is `null` and visible means `el > 0`. If `"terrain"` is asked for and no mask file exists yet, the API falls back to flat and returns `"horizon": "flat"`, so the UI can show a label. Arrays in the examples are shortened. All arrays have the same length as `times`, except `mask_deg`, which has `n_az` entries.
+
+Optional `mast_m` (mast height in metres; C ships `0` and `10`): with `horizon=terrain&mast_m=10` the API reads `masks/{site_id}_h10.json` (same format as contract 2, `site_height_m: 10`). If that file is missing it falls back to the 0 m mask. The response's `mast_m` is the height actually used (always `0` for a flat horizon or a fallback). Default `0`.
 
 **5. `GET /compare?sites=haworth,malapert,nobile_rim_1&start=...&stop=...&step_h=1&horizon=terrain&land_at=2026-12-05T12:00:00Z`** (served by A, used by B for metric cards and the comparison table)
 
@@ -265,6 +268,7 @@ Conventions for all of them: times are UTC ISO-8601 strings (`"2026-12-01T00:00:
       "site": "haworth",
       "name": "Haworth",
       "horizon": "terrain",
+      "mast_m": 0,
       "pct_sunlit": 62.1,
       "longest_dark_h": 98,
       "pct_earth": 48.3,
@@ -282,7 +286,7 @@ Conventions for all of them: times are UTC ISO-8601 strings (`"2026-12-01T00:00:
 }
 ```
 
-`land_at` is optional; without it, `next_sunset_h` and `next_earthset_h` are measured from `start`. They are `null` if the body is not visible at that time, and `-1` if it never sets in the range. `both_windows` lists every stretch where the Sun **and** Earth are both visible.
+`land_at` is optional; without it, `next_sunset_h` and `next_earthset_h` are measured from `start`. They are `null` if the body is not visible at that time, and `-1` if it never sets in the range. `both_windows` lists every stretch where the Sun **and** Earth are both visible. `/compare` takes the same optional `mast_m` as `/ephemeris`, and each result reports its own `horizon` and `mast_m` (one site can fall back while another doesn't).
 
 ### Timeline and integration points
 

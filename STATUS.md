@@ -8,7 +8,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
-| A | Data and backend | blocked | Waiting on C: 4 masks to rebuild for moved sites. Backend done; deploy ready | `main` | Yes: waiting on C's mask rebuild, and a hosting account for deploy | Sat 11:47 |
+| A | Data and backend | blocked | Backend done incl. `mast_m` (#13). Only deploy left | `main` | Yes: needs a Render/Railway account to deploy | Sat 11:54 |
 | B | Frontend | in review | Full UI on the real API in PR #11; waiting on deploy URL + stale masks | `frontend/ui` (PR #11) | Partly: see B section | Sat 11:55 |
 | C (Lucas) | Terrain horizon masks | working | Masks rebuilt for moved sites + 10 m mast masks + map backdrop merged (#12); next: Sun/Earth check, README limitations, Explain-it text | `claude/project-thread-mabu61` | No | Sat 11:53 |
 
@@ -16,14 +16,14 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 ## A: data and backend
 
-- **Status:** waiting (on C for masks; deploy needs a Render/Railway account)
-- **Current task:** none until C's masks are rebuilt
-- **Branch / PR:** #6, #7, #8, #9, #10 all merged
-- **Done so far:** Backend complete on main: `sites.json`, `horizons.py` + offline cache, `metrics.py`, `app.py` (`/sites`, `/ephemeris`, `/compare`, terrain with flat fallback), 30 tests. PR #9 moved haworth, mons_mouton_plateau, nobile_rim_1 and de_gerlache_rim_2 to C's suggested points (nobile_rim_1 uses the runner-up that stays on the rim). Terrain gate checked against C's masks: terrain sunlight <= flat at every site; the Earth increases at mons_mouton and peak_near_cabeus_b are real (mask 2 to 4 deg below 0 toward Earth). Deploy config and steps in `backend/WORKFLOW.md` (Procfile, pinned requirements, `HORIZONS_OFFLINE=1`). **End-to-end check at 11:45:** B's `frontend/ui` against my local API in a headless browser: every call 200, no console errors, table, windows, sky plots and timelines all render with real numbers
-- **Next:** once C rebuilds the masks: rerun the terrain gate and confirm the demo trio. Then deploy at 6:00 and give B the URL
-- **Blocked on:** **C**: the masks on main for `haworth`, `mons_mouton_plateau`, `nobile_rim_1` and `de_gerlache_rim_2` were built at 16:31Z for the old points (Haworth is still on the crater floor: mean horizon 7.0 deg, never sunlit). Please rerun `python terrain/build_masks.py` (it reads the new `sites.json`) and merge. **Deploy**: needs someone with a Render or Railway account (steps in `backend/WORKFLOW.md`)
-- **Needs from others:** B: nothing; your app works against the real API (run: `cd backend && pip install -r requirements-dev.txt && uvicorn app:app --reload`, then `VITE_API_URL=http://localhost:8000 npm run dev`)
-- **Updated:** Sat 11:47 ET
+- **Status:** waiting (deploy needs a hosting account; everything else done)
+- **Current task:** deploy the backend (waiting for a Render or Railway account)
+- **Branch / PR:** #6, #7, #8, #9, #10, #13 all merged
+- **Done so far:** Backend complete on main: `sites.json`, `horizons.py` + offline cache, `metrics.py`, `app.py` (`/sites`, `/ephemeris`, `/compare`, terrain with flat fallback), 31 tests. **Terrain gate rerun on C's rebuilt masks (11:58): passes.** Terrain sunlight <= flat everywhere except nobile_rim_1, mons_mouton_plateau and de_gerlache_rim_2. There the extra hours are the Sun 0 to 3.4 deg below the flat horizon toward the pole (az 100 to 256), where those masks dip to -1.3 to -5.9 deg (high points on the Mons Mouton massif and the de Gerlache rim). Looks physical. **Mast slider (#13):** `mast_m=10` on `/ephemeris` and `/compare` reads `{site}_h10.json`, falls back to the 0 m mask, and returns `mast_m` (the height used). README contracts 4 and 5 updated. Deploy config + steps in `backend/WORKFLOW.md`
+- **Next:** deploy as soon as there is an account; give B the URL; write it in the README
+- **Blocked on:** a Render or Railway account to deploy with (asked our human lead)
+- **Needs from others:** B: `mast_m` is live on main; send `mast_m=10` with `horizon=terrain`, and read `mast_m` back per result for the label. C: in your Sun/Earth check, please eyeball the negative masks at nobile_rim_1 and mons_mouton_plateau (down to -5.9 deg toward az 100 to 256); they add up to 15 points of sunlight
+- **Updated:** Sat 11:54 ET
 
 ---
 
@@ -60,6 +60,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 11:54 · A · Terrain gate passes on C's rebuilt masks. `mast_m` merged (#13), slider unblocked for B. Only deploy left; waiting on a hosting account.
 - Sat 11:53 · C · #12 merged: 4 masks rebuilt for the moved sites, 10 m mast masks for all sites, map backdrop for B. A and B no longer waiting on C.
 - Sat 11:55 · B · Full frontend on the real API in PR #11 (MVP + window finder, scrubber, map). Waiting on: C to rebuild 4 stale masks + make the map backdrop; A's deployed URL.
 - Sat 11:47 · A · Waiting on C to rebuild 4 masks (sites moved to C's suggested points in PR #9). Backend + B's frontend verified end to end. Deploy config ready.

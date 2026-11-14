@@ -8,7 +8,7 @@ import horizons
 
 c = TestClient(appmod.app)
 Q = {"start": "2026-12-01", "stop": "2026-12-31", "step_h": 1}
-METRIC_KEYS = {"site", "name", "horizon", "pct_sunlit", "longest_dark_h", "pct_earth",
+METRIC_KEYS = {"site", "name", "horizon", "mast_m", "pct_sunlit", "longest_dark_h", "pct_earth",
                "longest_blackout_h", "pct_both", "max_sun_el_deg", "mean_sun_el_deg",
                "next_sunset_h", "next_earthset_h", "both_windows"}
 
@@ -24,7 +24,7 @@ def test_sites():
 
 def test_ephemeris_shape():
     d = c.get("/ephemeris", params={**Q, "site": "haworth", "horizon": "flat"}).json()
-    assert set(d) == {"site", "start", "stop", "step_h", "horizon", "times", "sun", "earth", "mask_deg"}
+    assert set(d) == {"site", "start", "stop", "step_h", "horizon", "mast_m", "times", "sun", "earth", "mask_deg"}
     assert d["start"] == "2026-12-01T00:00:00Z" and d["stop"] == "2026-12-31T00:00:00Z"
     assert len(d["times"]) == 720 and d["times"][1] == "2026-12-01T01:00:00Z"
     for b in ("sun", "earth"):
@@ -91,3 +91,23 @@ def test_uncached_range_is_502_not_crash():
 def test_cors():
     r = c.get("/sites", headers={"Origin": "http://localhost:5173"})
     assert r.headers.get("access-control-allow-origin") == "*"
+
+
+def test_mast_mask_and_fallback(tmp_path, monkeypatch):
+    base = {"site": "haworth", "n_az": 360}
+    (tmp_path / "haworth.json").write_text(json.dumps({**base, "mask_deg": [90.0] * 360}))
+    (tmp_path / "haworth_h10.json").write_text(json.dumps({**base, "mask_deg": [-90.0] * 360}))
+    (tmp_path / "malapert_massif.json").write_text(json.dumps({**base, "mask_deg": [90.0] * 360}))
+    monkeypatch.setattr(appmod, "MASKS", tmp_path)
+    p = {**Q, "site": "haworth", "horizon": "terrain"}
+    d0 = c.get("/ephemeris", params=p).json()
+    d10 = c.get("/ephemeris", params={**p, "mast_m": 10}).json()
+    assert d0["mast_m"] == 0 and not any(d0["sun"]["visible"])
+    assert d10["mast_m"] == 10 and all(d10["sun"]["visible"])
+    # no _h10 file: falls back to the 0 m mask and says mast_m 0
+    r = c.get("/compare", params={**Q, "sites": "haworth,malapert_massif", "horizon": "terrain", "mast_m": 10}).json()
+    got = {x["site"]: (x["horizon"], x["mast_m"]) for x in r["results"]}
+    assert got == {"haworth": ("terrain", 10), "malapert_massif": ("terrain", 0)}
+    # flat ignores the mast
+    assert c.get("/ephemeris", params={**Q, "site": "haworth", "mast_m": 10}).json()["mast_m"] == 0
+    assert c.get("/ephemeris", params={**p, "mast_m": -1}).status_code == 422
