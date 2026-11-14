@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCompare, getEphemeris, getSites, USING_MOCKS } from "./api";
 import CompareTable from "./components/CompareTable";
 import Controls, { type Query } from "./components/Controls";
 import Explain from "./components/Explain";
+import Scrubber from "./components/Scrubber";
 import SiteCard from "./components/SiteCard";
 import WindowFinder from "./components/WindowFinder";
 import type { CompareResponse, EphemerisResponse, Horizon, Site } from "./types";
@@ -28,6 +29,9 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [zoom, setZoom] = useState(true);
   const [minHours, setMinHours] = useState(72);
+  const [cursor, setCursor] = useState(-1); // index into the shared time axis
+  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(3);
   const reqId = useRef(0);
 
   useEffect(() => {
@@ -57,6 +61,10 @@ export default function App() {
       if (id !== reqId.current) return; // a newer request finished first
       setCmp(c);
       setEphs(Object.fromEntries(es.map((e) => [e.site, e])));
+      // Start the scrubber at the landing time (or the start of the range).
+      const land = c.land_at ? (es[0]?.times.indexOf(c.land_at) ?? -1) : -1;
+      setCursor(land >= 0 ? land : 0);
+      setPlaying(false);
     } catch (e) {
       if (id === reqId.current) setError((e as Error).message);
     } finally {
@@ -83,6 +91,20 @@ export default function App() {
   };
 
   const dirty = JSON.stringify(draft) !== JSON.stringify(query);
+
+  // All sites share one time axis (same start, stop and step), so use the first one's.
+  const times = useMemo(() => Object.values(ephs)[0]?.times ?? [], [ephs]);
+  const cursorIso = cursor >= 0 && cursor < times.length ? times[cursor] : null;
+  const pickTime = useCallback(
+    (iso: string) => {
+      const i = times.indexOf(iso);
+      if (i >= 0) {
+        setPlaying(false);
+        setCursor(i);
+      }
+    },
+    [times],
+  );
   const landAtIso = cmp?.land_at ?? toIso(query?.landAt ?? "") ?? null;
 
   return (
@@ -132,8 +154,22 @@ export default function App() {
               </div>
               <p className="muted small">
                 Sky dome: north at top, east to the right, centre = straight overhead. Shaded band = terrain blocking the
-                sky. Markers show the Sun (●) and Earth (◆) at the landing time (dotted line on the timeline).
+                sky. Markers show the Sun (●) and Earth (◆) at the time on the slider (red line on the timeline; filled
+                = visible, hollow = hidden). The dotted line is the landing time. Click a timeline to jump there.
               </p>
+              {times.length > 0 && cursor >= 0 && (
+                <Scrubber
+                  times={times}
+                  index={Math.min(cursor, times.length - 1)}
+                  onIndex={setCursor}
+                  playing={playing}
+                  onPlaying={setPlaying}
+                  speed={speed}
+                  onSpeed={setSpeed}
+                  landIndex={cmp.land_at ? times.indexOf(cmp.land_at) : -1}
+                  stepH={cmp.step_h}
+                />
+              )}
               <div className={`cards ${loading ? "stale" : ""}`}>
                 {cmp.results.map((m) => (
                   <SiteCard
@@ -142,6 +178,8 @@ export default function App() {
                     eph={ephs[m.site]}
                     requested={query?.horizon ?? "terrain"}
                     landAt={landAtIso}
+                    cursor={cursorIso}
+                    onPick={pickTime}
                     zoom={zoom}
                   />
                 ))}

@@ -8,11 +8,25 @@ interface Props {
   eph: EphemerisResponse | undefined;
   requested: Horizon;
   landAt: string | null;
+  /** Scrubber time (ISO) shared by all cards. */
+  cursor: string | null;
+  onPick: (iso: string) => void;
   zoom: boolean;
 }
 
-export default function SiteCard({ metrics: m, eph, requested, landAt, zoom }: Props) {
-  const markIndex = eph && landAt ? eph.times.indexOf(landAt) : -1;
+function Now({ label, el, az, up }: { label: string; el: number; az: number; up: boolean }) {
+  return (
+    <span className={`now-item ${up ? "up" : "down"}`}>
+      {label} <b>{up ? "visible" : "hidden"}</b> <span className="muted">
+        {el.toFixed(1)}° up, az {az.toFixed(0)}°
+      </span>
+    </span>
+  );
+}
+
+export default function SiteCard({ metrics: m, eph, requested, landAt, cursor, onPick, zoom }: Props) {
+  const landIndex = eph && landAt ? eph.times.indexOf(landAt) : -1;
+  const markIndex = eph && cursor ? eph.times.indexOf(cursor) : landIndex;
   const fellBack = requested === "terrain" && m.horizon === "flat";
   const best = m.both_windows.reduce<(typeof m.both_windows)[number] | null>(
     (a, w) => (!a || w.hours > a.hours ? w : a),
@@ -62,8 +76,19 @@ export default function SiteCard({ metrics: m, eph, requested, landAt, zoom }: P
 
       {eph ? (
         <>
+          {markIndex >= 0 && (
+            <div className="now">
+              <Now label="Sun" el={eph.sun.el[markIndex]} az={eph.sun.az[markIndex]} up={eph.sun.visible[markIndex]} />
+              <Now
+                label="Earth"
+                el={eph.earth.el[markIndex]}
+                az={eph.earth.az[markIndex]}
+                up={eph.earth.visible[markIndex]}
+              />
+            </div>
+          )}
           <SkyPlot eph={eph} markIndex={markIndex} zoom={zoom} />
-          <Timeline eph={eph} landAt={markIndex >= 0 ? landAt : null} />
+          <Timeline eph={eph} landAt={landIndex >= 0 ? landAt : null} cursor={cursor} onPick={onPick} />
         </>
       ) : (
         <p className="muted">Loading sky data…</p>
