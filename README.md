@@ -2,7 +2,7 @@
 
 _Build plan, Nov 14, 2026_
 
-**Live backend:** <https://lunar-site-navigator-api.onrender.com> (API docs at [`/docs`](https://lunar-site-navigator-api.onrender.com/docs)). It serves from the committed cache only (Nov 17 2026 to Jan 14 2027). It is on Render's free plan, so the first request after 15 idle minutes takes about a minute while it wakes up.
+**Live backend:** <https://lunar-site-navigator-api.onrender.com> (API docs at [`/docs`](https://lunar-site-navigator-api.onrender.com/docs)). It serves from the committed cache only (Nov 17 2026 to Jan 14 2027). It does **not** redeploy on push: after a change to `backend/` merges, redeploy from the Render dashboard (Manual Deploy) or ask A. It is on Render's free plan, so the first request after 15 idle minutes takes about a minute while it wakes up.
 
 ## The challenge
 

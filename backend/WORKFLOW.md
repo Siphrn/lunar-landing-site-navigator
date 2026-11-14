@@ -96,7 +96,7 @@ If I am more than 30 minutes behind at any sync, I say so in `STATUS.md` and tea
 
 ## Deploy
 
-**Deployed:** <https://lunar-site-navigator-api.onrender.com> (Render, free plan, auto-deploys from `main` on every push, settings as below).
+**Deployed:** <https://lunar-site-navigator-api.onrender.com> (Render, free plan, settings as below). Render is not connected to GitHub, so it does **not** redeploy on push: after anything in `backend/` (including C's masks) merges, trigger a deploy (dashboard > Manual Deploy > latest commit, or `POST /v1/services/{id}/deploys` on the Render API).
 
 The backend serves only from the committed cache when `HORIZONS_OFFLINE=1`, so the deployed app never calls Horizons. Dates outside Nov 17 2026 to Jan 14 2027 return HTTP 502 with a clear message.
 
