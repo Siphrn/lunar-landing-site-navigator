@@ -1,4 +1,4 @@
-import type { SiteMetrics } from "./types";
+import type { SiteMetrics, Window } from "./types";
 
 export const COLORS = {
   sun: "#e8930c",
@@ -47,4 +47,9 @@ export function bestValues(rows: SiteMetrics[]): Partial<Record<MetricKey, numbe
 
 export function fmtUtc(iso: string): string {
   return iso.replace("T", " ").replace(/:00Z$/, " UTC").replace(/Z$/, " UTC");
+}
+
+/** First window (in time order) where Sun AND Earth stay up for at least `min` hours. */
+export function firstWindow(windows: Window[], min: number): Window | null {
+  return windows.find((w) => w.hours >= min) ?? null;
 }

@@ -65,6 +65,7 @@ export default function SkyPlot({ eph, markIndex, zoom }: Props) {
   ] as const) {
     const b = eph[key];
     // Faint dotted where the body is below the horizon, solid where it is visible.
+    const everVisible = b.visible.some(Boolean);
     for (const vis of [false, true]) {
       const t = track(b.az, b.el, b.visible, vis);
       data.push({
@@ -72,9 +73,10 @@ export default function SkyPlot({ eph, markIndex, zoom }: Props) {
         theta: t.theta,
         r: t.r,
         mode: "lines",
-        name: vis ? label : `${label} (hidden)`,
+        name: vis || !everVisible ? label : `${label} (hidden)`,
         legendgroup: key,
-        showlegend: vis,
+        // A body that is never visible still gets a legend entry (on its hidden trace).
+        showlegend: vis ? everVisible : !everVisible,
         opacity: vis ? 1 : 0.35,
         line: { color, width: vis ? 2.5 : 1.5, dash: vis ? "solid" : "dot" },
         connectgaps: false,

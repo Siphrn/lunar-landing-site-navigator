@@ -2,14 +2,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { getCompare, getEphemeris, getSites, USING_MOCKS } from "./api";
 import CompareTable from "./components/CompareTable";
 import Controls, { type Query } from "./components/Controls";
+import Explain from "./components/Explain";
 import SiteCard from "./components/SiteCard";
+import WindowFinder from "./components/WindowFinder";
 import type { CompareResponse, EphemerisResponse, Horizon, Site } from "./types";
 
 const DEFAULT_QUERY: Query = {
-  sites: ["haworth", "malapert", "nobile_rim_1"],
+  // Picked from real data: a peak with great Earth view, a massif, and a rim that never sees Earth.
+  sites: ["mons_mouton", "malapert_massif", "nobile_rim_1"],
   start: "2026-12-01",
   stop: "2026-12-31",
-  landAt: "2026-12-05T12:00",
+  landAt: "2026-12-15T12:00",
   horizon: "terrain",
 };
 
@@ -24,6 +27,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [zoom, setZoom] = useState(true);
+  const [minHours, setMinHours] = useState(72);
   const reqId = useRef(0);
 
   useEffect(() => {
@@ -71,6 +75,13 @@ export default function App() {
     setQuery(next);
   };
 
+  /** Land at a chosen time: re-run with the same sites, dates and horizon. */
+  const landAt = (iso: string) => {
+    const next = { ...(query ?? draft), landAt: iso.slice(0, 16) };
+    setDraft(next);
+    setQuery(next);
+  };
+
   const dirty = JSON.stringify(draft) !== JSON.stringify(query);
   const landAtIso = cmp?.land_at ?? toIso(query?.landAt ?? "") ?? null;
 
@@ -97,11 +108,18 @@ export default function App() {
 
         {error && <p className="error panel">{error}</p>}
 
+        <Explain />
+
         {cmp && (
           <>
             <section>
               <h2>Comparison</h2>
               <CompareTable cmp={cmp} requested={query?.horizon ?? "terrain"} />
+            </section>
+
+            <section>
+              <h2>Best landing window</h2>
+              <WindowFinder cmp={cmp} minHours={minHours} onMinHours={setMinHours} onLand={landAt} />
             </section>
 
             <section>
