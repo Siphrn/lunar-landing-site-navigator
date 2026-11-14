@@ -10,7 +10,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | done | Backend live and current (masks #18). Available for fixes | `main` | No | Sat 12:17 |
 | B | Frontend | done | Site live: https://siphrn.github.io/nasaSpaceAppChallenge/ ; demo video recorded | `main` | No | Sat 12:18 |
-| C (Lucas) | Terrain + README/submission | working | Submission text matches the real form (#24); **need a ≤30 s demo video from B** | `claude/project-thread-mabu61` | Waiting on B (30 s video) | Sat 12:33 |
+| C (Lucas) | Terrain + README/submission | done | Submission ready: 29.5 s demo video `docs/demo.mp4` (#25), text in `docs/submission.md`; Lucas submits by 8 PM ET | `claude/project-thread-mabu61` | No | Sat 12:45 |
 
 ---
 
@@ -42,12 +42,12 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 ## C: terrain horizon masks (Lucas)
 
 - **Status:** working
-- **Current task:** submission ready except the demo link; `docs/submission.md` follows the real form field by field (#24)
+- **Current task:** submission ready. 29.5 s demo video committed as `docs/demo.mp4` (#25) and linked in the README and `docs/submission.md`
 - **Branch / PR:** `claude/project-thread-mabu61`. #12, #14, #15, #18, #19 merged
 - **Done so far:** all 10 polar masks + `_h10` mast masks on `main` match `sites.json` (haworth and malapert_massif rebuilt for A's #17 in **#18**). Map backdrop for B. Sun/Earth check (`terrain/validate.md` §4: ridge 100% sunlit; Malapert now 100% Sun / 50% Earth with terrain). Quickmap checks (§5): Haworth now inside its official region; Nobile Rim 1 inside its region. README "Limitations" section
 - **Next:** submission text; Lucas submits on the Space Apps page by 8:00
 - **Blocked on:** nothing
-- **Needs from others:** **B, important: the Space Apps form says the demo must be a video of 30 seconds or less (or at most 7 slides) to be eligible for a Global Award.** The current recording is ~69 s. Please cut a ≤30 s version (e.g. problem → pick 3 sites → flat/terrain toggle → table), then either commit it as `docs/demo.mp4` (GitHub counts as a public host, no account needed) or upload it unlisted to YouTube, and put the link in your STATUS section. C adds it to the README and `docs/submission.md`; Lucas submits
+- **Needs from others:** nothing. B: C made the 30 s cut from the app (`docs/record_demo_30s.cjs`); if you prefer your own ≤30 s cut, just replace `docs/demo.mp4` (the link stays the same)
 - **Updated:** Sat 12:33 ET
 
 ---
@@ -56,6 +56,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:45 · C · #25 merged: 29.5 s demo video `docs/demo.mp4` (recorded from the real app, captions read off the page), linked in README + submission. Submission is ready for Lucas.
 - Sat 12:33 · C · Space Apps form requires a demo video ≤30 s (or ≤7 slides). Asked B for a 30 s cut. Submission text now matches the form (#24); README states AI use as the form requires.
 - Sat 12:30 · C · #22 merged: README front page for judges (live links, 2 app screenshots, how it works, run locally) + MIT LICENSE; build plan kept as an appendix. Asked B to upload the demo video unlisted to YouTube.
 - Sat 12:21 · C · Pages is on (Lucas set Source: GitHub Actions). Workflow run #3 succeeded; site: https://siphrn.github.io/nasaSpaceAppChallenge/ . Also merged B's #20 (demo caption fix).
