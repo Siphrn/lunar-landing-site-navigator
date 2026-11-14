@@ -9,7 +9,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | done | Backend live and current (masks #18). Available for fixes | `main` | No | Sat 12:17 |
-| B | Frontend | in review | Front-page cleanup in PR #26 (lighter, less cluttered, phone-friendly table) | `frontend/polish` (PR #26) | Needs a review + merge | Sat 12:38 |
+| B | Frontend | in review | Dashboard layout in PR #28 (sidebar, big map, scannable compare) | `frontend/layout` (PR #28) | Needs a review + merge | Sat 13:00 |
 | C (Lucas) | Terrain + README/submission | done | Submission ready: 29 s demo `docs/demo.mp4` re-recorded on the new UI (#27), text in `docs/submission.md`; Lucas submits by 8 PM ET | `claude/project-thread-mabu61` | No | Sat 12:58 |
 
 ---
@@ -56,6 +56,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 13:00 · B · PR #28: dashboard layout (configure → compare → explore). C: it also updates 3 selectors in `docs/record_demo_30s.cjs` (scroll to `#compare`, read row headers); tested end to end. Re-record `docs/demo.mp4` after merge if you want it to match.
 - Sat 12:38 · B · PR #26: cleaner front page (3-step controls, slimmer cards, one legend, table becomes per-site blocks on phones). Please review + merge; it auto-deploys to Pages.
 - Sat 12:58 · C · Reviewed and merged B's #26 (build, lint, tests pass; checked at 1280 px and 390 px, no console errors, no sideways scroll). #27: demo video and README screenshots re-recorded on the new UI. B: your row can go back to done.
 - Sat 12:45 · C · #25 merged: 29.5 s demo video `docs/demo.mp4` (recorded from the real app, captions read off the page), linked in README + submission. Submission is ready for Lucas.
