@@ -10,7 +10,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | done | Backend deployed: https://lunar-site-navigator-api.onrender.com. Waiting on C to rebuild 2 masks, then final check | `main` | Waiting on C (2 masks) | Sat 12:03 |
 | B | Frontend | in review | All lane-B features done in PR #11; final snapshot + demo after A/C move 2 sites | `frontend/ui` (PR #11) | Waiting: PR #11 review, Pages setting, haworth/malapert move | Sat 12:05 |
-| C (Lucas) | Terrain horizon masks | working | Haworth point is outside its official region (#15); waiting on A to move haworth + malapert_massif | `claude/project-thread-mabu61` | Waiting on A (2 coordinates) | Sat 12:07 |
+| C (Lucas) | Terrain horizon masks | working | All masks current (#18); Quickmap checks done (#19); next: final README + submission at 6:00 | `claude/project-thread-mabu61` | No | Sat 12:10 |
 
 ---
 
@@ -46,18 +46,13 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 ## C: terrain horizon masks (Lucas)
 
 - **Status:** working
-- **Current task:** waiting on A to move haworth + malapert_massif (below); then final README + submission prep (6:00)
-- **Branch / PR:** `claude/project-thread-mabu61`. #12 and [#14](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/14) merged
-- **Done so far:** all polar masks + `_h10` mast masks on `main`, matching `sites.json`; map backdrop for B; **Sun/Earth check** (`terrain/sun_earth_check.py`, results in `terrain/validate.md` §4): connecting ridge 100% sunlit, terrain <= flat except on high points; **README "Limitations" section** added
-- **Answer for A:** the negative masks at nobile_rim_1 (−5.9° at az 107) and mons_mouton_plateau (−4.4° at az 205) are real: the ground drops ~4 km within 10 km into a basin toward the pole, and stays 4–7° below level out to 150 km with curvature. Profiles in `terrain/validate.md` §4. Caveat: nobile_rim_1's ground is 5,846 m, the Mons Mouton massif's height, so that point may sit on the massif rather than Nobile's rim (Quickmap check)
-- **"Explain it" text:** B already wrote it (`Explain.tsx` in PR #11) and it reads well; C won't duplicate it
-- **Next:** rebuild masks if A moves Malapert; Quickmap screenshot (needs Lucas); final README + submission at 6:00
+- **Current task:** nothing blocking anyone. Next: final README + submission prep (6:00)
+- **Branch / PR:** `claude/project-thread-mabu61`. #12, #14, #15, #18, #19 merged
+- **Done so far:** all 10 polar masks + `_h10` mast masks on `main` match `sites.json` (haworth and malapert_massif rebuilt for A's #17 in **#18**). Map backdrop for B. Sun/Earth check (`terrain/validate.md` §4: ridge 100% sunlit; Malapert now 100% Sun / 50% Earth with terrain). Quickmap checks (§5): Haworth now inside its official region; Nobile Rim 1 inside its region. README "Limitations" section
+- **Next:** final README (screenshot/GIF, how it works, data sources, limitations, how to run) and submission checklist at 6:00; rebuild masks if any coordinate changes
 - **Blocked on:** nothing
-- **Needs from others:** **A: please update 2 points in `sites.json`, refetch their Horizons cache, and ping C:**
-  1. **`haworth` → −86.9737, 335.6129.** Quickmap's official Haworth region outline (screenshot in `terrain/validate.md` §5) shows the current point −87.9994, 337.4768 is ~60 km *outside* the region. The new point is the best one inside it (mean horizon ~0°, slope 4.5°). It moves ~115 km, so the cache must be refetched. (#15)
-  2. **`malapert_massif` → −86.0187, 2.2013.** The current point sits in a ~300 m summit crater (Sun 26%, Earth 43% with terrain); 1.6 km away is 100% / 50%.
-  C rebuilds the masks within minutes of the change.
-- **Updated:** Sat 12:07 ET
+- **Needs from others:** A: rerun the terrain gate on the 2 rebuilt masks (#18). Anyone: tell C if a site moves (C rebuilds in ~10 s). B: live app URL when the frontend is deployed (for the README)
+- **Updated:** Sat 12:10 ET
 
 ---
 
@@ -65,6 +60,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:10 · C · #18: masks rebuilt for A's moved haworth + malapert_massif. #19: Nobile Rim 1 checked inside its official Quickmap region. Nobody waiting on C.
 - Sat 12:05 · B · PR #11 has every frontend feature + mast switch, offline snapshot, Pages deploy, demo recorder. Waiting on: PR #11 review, Pages setting, haworth/malapert move.
 - Sat 12:03 · A · Backend deployed: https://lunar-site-navigator-api.onrender.com (B: use as VITE_API_URL). Moved haworth + malapert_massif (#17); waiting on C to rebuild those 2 masks.
 - Sat 12:07 · C · Quickmap check: Haworth point is ~60 km outside the official region (#15). Asking A to move haworth and malapert_massif.
