@@ -149,6 +149,301 @@ Order matters: get real numbers flowing end-to-end before polishing anything. A 
 - [ ] README with screenshot/GIF, architecture, data sources, limitations
 - [ ] 30–60 s demo video; submit on the Space Apps project page
 
+## Team split (3 people)
+
+This section is written for a handoff: each lane can be picked up cold by someone who has read only this README. Lanes are ordered **hardest to easiest**. Each person owns their files; touch someone else's files only after telling them.
+
+| Lane | Person | Owns | Difficulty | Hand to |
+| --- | --- | --- | --- | --- |
+| C | Terrain horizon masks (+ README/submission) | `terrain/`, `backend/data/masks/` | Hardest | Strongest math / Python person |
+| A | Data and backend | `backend/` (except `data/masks/`), `sites.json` | Medium | Someone steady; everyone depends on this lane |
+| B | Frontend | `frontend/` | Easiest technically, most polish | Best eye for design |
+
+> Optional: if C is behind, move the README, "Explain it" panel text and submission work from C to B, so C can focus only on terrain.
+
+### Repo layout everyone agrees on
+
+```text
+backend/
+  app.py              # FastAPI app (A)
+  horizons.py         # JPL Horizons fetch + cache (A)
+  metrics.py          # visibility + metrics (A)
+  data/
+    sites.json        # curated site list (A)
+    cache/            # cached Horizons responses, committed for the demo (A)
+    masks/            # one JSON per site, produced by C
+  requirements.txt
+terrain/
+  horizon_mask.py     # ray-caster (C)
+  build_masks.py      # runs horizon_mask over every site, writes backend/data/masks/ (C)
+  validate.md         # notes + screenshots comparing masks with Quickmap (C)
+  dem/                # downloaded LOLA GeoTIFFs, NOT committed (add to .gitignore)
+frontend/
+  src/                # Vite + React + TypeScript (B)
+  src/mock/           # fake API responses matching the contracts below (B)
+```
+
+### Shared contracts (agree in hour 0, about 15 minutes)
+
+These shapes are the only thing the three lanes share. Once they are fixed, nobody waits on anybody: B builds against mock files, C writes files A can read, and A serves them. **Change a contract only after all three agree, and update this section in the same commit.**
+
+Conventions for all of them: times are UTC ISO-8601 strings (`"2026-12-01T00:00:00Z"`); angles are degrees; azimuth is measured clockwise from local north (0 = north, 90 = east); longitudes are **east-positive, 0–360** (`lon_e`); latitudes are negative in the south.
+
+**1. `backend/data/sites.json`** (written by A, read by A and C)
+
+```json
+[
+  {
+    "id": "haworth",
+    "name": "Haworth",
+    "lat": -87.45,
+    "lon_e": 355.0,
+    "group": "candidate",
+    "note": "NASA Artemis candidate region"
+  },
+  {
+    "id": "apollo11",
+    "name": "Apollo 11 (control)",
+    "lat": 0.674,
+    "lon_e": 23.473,
+    "group": "control",
+    "note": "Near-equator control site"
+  }
+]
+```
+
+`id` is lowercase with underscores and is used in file names and URLs. `group` is `"candidate"`, `"other"` or `"control"`. The coordinates above are placeholders: take real ones from Quickmap.
+
+**2. `backend/data/masks/{site_id}.json`** (written by C, read by A)
+
+```json
+{
+  "site": "haworth",
+  "n_az": 360,
+  "az_step_deg": 1.0,
+  "mask_deg": [1.84, 1.91, 2.03, 2.10],
+  "dem": "LDEM_80S_80MPP_ADJ.TIF",
+  "dem_res_m": 80,
+  "max_km": 120,
+  "site_height_m": 0,
+  "generated_at": "2026-11-14T18:00:00Z"
+}
+```
+
+`mask_deg` always has exactly `n_az` numbers (360 here; the example is shortened). `mask_deg[i]` is the elevation angle of the terrain horizon at azimuth `i * az_step_deg`. It can be negative on a peak, because a peak sees past the flat horizon. A body is visible when `elevation > mask_deg(azimuth)`.
+
+**3. `GET /sites`** (served by A, used by B): returns the `sites.json` array as is.
+
+**4. `GET /ephemeris?site=haworth&start=2026-12-01&stop=2026-12-31&step_h=1&horizon=terrain`** (served by A, used by B for the sky plot and timeline)
+
+```json
+{
+  "site": "haworth",
+  "start": "2026-12-01T00:00:00Z",
+  "stop": "2026-12-31T00:00:00Z",
+  "step_h": 1,
+  "horizon": "terrain",
+  "times": ["2026-12-01T00:00:00Z", "2026-12-01T01:00:00Z"],
+  "sun":   { "az": [123.4, 124.0], "el": [1.2, 1.3], "visible": [false, true] },
+  "earth": { "az": [355.1, 355.2], "el": [2.8, 2.8], "visible": [true, true] },
+  "mask_deg": [1.84, 1.91, 2.03, 2.10]
+}
+```
+
+`horizon` is `"flat"` or `"terrain"`. With `"flat"`, `mask_deg` is `null` and visible means `el > 0`. If `"terrain"` is asked for and no mask file exists yet, the API falls back to flat and returns `"horizon": "flat"`, so the UI can show a label. Arrays in the examples are shortened. All arrays have the same length as `times`, except `mask_deg`, which has `n_az` entries.
+
+**5. `GET /compare?sites=haworth,malapert,nobile_rim_1&start=...&stop=...&step_h=1&horizon=terrain&land_at=2026-12-05T12:00:00Z`** (served by A, used by B for metric cards and the comparison table)
+
+```json
+{
+  "start": "2026-12-01T00:00:00Z",
+  "stop": "2026-12-31T00:00:00Z",
+  "step_h": 1,
+  "land_at": "2026-12-05T12:00:00Z",
+  "results": [
+    {
+      "site": "haworth",
+      "name": "Haworth",
+      "horizon": "terrain",
+      "pct_sunlit": 62.1,
+      "longest_dark_h": 98,
+      "pct_earth": 48.3,
+      "longest_blackout_h": 210,
+      "pct_both": 31.0,
+      "max_sun_el_deg": 3.9,
+      "mean_sun_el_deg": 1.6,
+      "next_sunset_h": 41,
+      "next_earthset_h": 12,
+      "both_windows": [
+        { "start": "2026-12-02T03:00:00Z", "stop": "2026-12-04T19:00:00Z", "hours": 64 }
+      ]
+    }
+  ]
+}
+```
+
+`land_at` is optional; without it, `next_sunset_h` and `next_earthset_h` are measured from `start`. They are `null` if the body is not visible at that time, and `-1` if it never sets in the range. `both_windows` lists every stretch where the Sun **and** Earth are both visible.
+
+### Timeline and integration points
+
+| When | Who | What has to be true |
+| --- | --- | --- |
+| Hour 0–0.25 | All | Contracts above agreed, repo layout created, `.gitignore` covers `terrain/dem/` |
+| Hour 1 | A | `sites.json` committed with real coordinates (C needs it to start building masks) |
+| Hour 1 | B | Mock files in `frontend/src/mock/` that match contracts 3–5 exactly |
+| Hour 3 | A | `/sites`, `/ephemeris` and `/compare` running locally with a flat horizon |
+| **Hour 5: flat-horizon join-up** | A + B | B switches from mocks to the real API. The full app works end to end with a flat horizon. This is the safety net: if nothing else ships, this does |
+| Hour 6 | C | First mask for one site, checked against Quickmap (rotation sign confirmed) |
+| Hour 8 | C | Masks for all sites in `backend/data/masks/` |
+| **Hour 10: terrain swap** | A + C | A's API serves `horizon=terrain` from C's files. B's flat/terrain toggle shows both numbers |
+| Hour 10–12 | All | A deploys the backend, B deploys the frontend and records the demo, C finishes README and submission |
+
+---
+
+### Lane C: terrain horizon masks (hardest)
+
+**Goal.** For every site, produce a 360-number curve saying how high the real terrain horizon is in each compass direction. This is what makes the app accurate at the pole and is the strongest technical talking point.
+
+**You own.** `terrain/horizon_mask.py`, `terrain/build_masks.py`, `terrain/validate.md`, and everything in `backend/data/masks/`. Later (unless moved to B): README, the "Explain it" panel text, and the Space Apps submission.
+
+**Inputs.** `backend/data/sites.json` from A (hour 1). A LOLA south-pole DEM GeoTIFF from [NASA PGDA product 90](https://pgda.gsfc.nasa.gov/products/90).
+
+**Outputs.** `backend/data/masks/{site_id}.json` in contract 2, one per south-pole site. Control (equator) sites do not need a mask; the API uses a flat horizon for them.
+
+**Libraries you will use.** `rasterio` (reads GeoTIFFs and their map projection), `pyproj` (converts lat/lon to the DEM's x/y metres), `numpy` (array maths). Install with `pip install rasterio pyproj numpy`.
+
+**Tasks**
+
+- [ ] Download the **coarsest** south-pole LDEM first (80 m/px or coarser). Do not start with the 20 m/px file: it is 2.6 GB. Put it in `terrain/dem/` and make sure that folder is git-ignored.
+- [ ] Open it with `rasterio` and print `ds.crs`, `ds.transform`, `ds.shape` and `ds.nodata`. Confirm it is polar stereographic and the units are metres.
+- [ ] Read only a window around each site, not the whole file: about ±150 km. Use `rasterio.windows.from_bounds` with the site's x/y ± 150,000 m.
+- [ ] Convert each site's `lat, lon_e` to DEM x/y with `pyproj.Transformer` (see the code starter). Check the site lands on a sensible pixel: its height should match what Quickmap shows within about 100 m.
+- [ ] Ray-cast 360 azimuths, sampling every 1–2 pixels out to 120 km, using the curvature formula `θ = arctan((h_t − h_s − d²/2R) / d)` with `R = 1,737,400 m`. Take the max θ along each ray.
+- [ ] **Fix the azimuth rotation.** In polar stereographic, the grid's "up" is not local north. Rotate each ray by the site's longitude so azimuth 0 points to local north (toward the equator at the south pole). The code starter has one version of this rotation; its sign may be wrong.
+- [ ] Validate on one site before doing the rest (see below). Write what you checked, with screenshots, in `terrain/validate.md`.
+- [ ] Write `build_masks.py`: loop over `sites.json`, skip `group == "control"`, write one file per site in contract 2. Commit the JSON files (they are small).
+- [ ] Optional stretch: a `site_height_m` parameter (mast height, e.g. 10 m) so B can build the mast-height slider. Write extra files as `masks/{site_id}_h10.json` and tell A.
+
+**How to validate**
+
+- Sanity: values should mostly sit between about −2° and +10°. A mask full of 0s means rays left the window or hit nodata; values of 40°+ mean a units or pixel-size mistake.
+- Direction check: pick a site next to a big crater rim whose direction you can see in Quickmap (e.g. Shackleton's rim seen from the connecting ridge). The mask must peak in that direction. If it peaks on the opposite or mirrored side, flip the rotation sign.
+- Cross-check with A: once A's `/ephemeris` works, the Sun at a well-lit ridge site should be visible for most of the month with your mask. If a famously well-lit site comes out mostly dark, suspect the rotation.
+
+**Known pitfalls**
+
+- Rotation sign in polar stereographic. This is the most likely bug in the whole project.
+- Longitude convention: the plan uses east-positive 0–360. A site at "5° W" is `lon_e = 355`.
+- Pixel indices: `~ds.transform * (x, y)` gives `(col, row)`, not `(row, col)`. Index arrays as `z[row, col]`.
+- Nodata values (often −32768 or very large numbers) must be masked out before taking the max.
+- Height units: some LOLA products store heights relative to a 1737.4 km sphere in metres, some in km. Check the product page.
+
+**Definition of done**
+
+- [ ] Every non-control site in `sites.json` has a mask file that passes the sanity range.
+- [ ] At least one site is checked against Quickmap, with notes and a screenshot in `terrain/validate.md`.
+- [ ] `python terrain/build_masks.py` rebuilds all masks from a clean checkout plus the downloaded DEM, with no manual steps.
+- [ ] A has confirmed `horizon=terrain` reads your files.
+
+---
+
+### Lane A: data and backend (medium)
+
+**Goal.** Turn "site + date range" into numbers: fetch where the Sun and Earth are from JPL Horizons, cache it, decide when each is visible, compute the metrics and serve them over a small HTTP API.
+
+**You own.** `backend/app.py`, `backend/horizons.py`, `backend/metrics.py`, `backend/data/sites.json`, `backend/data/cache/`, `backend/requirements.txt`, and the backend deployment.
+
+**Inputs.** Site coordinates from [Quickmap](https://quickmap.lroc.asu.edu). Sun/Earth positions from the [JPL Horizons API](https://ssd-api.jpl.nasa.gov/doc/horizons.html). Later, C's mask files.
+
+**Outputs.** The three endpoints in contracts 3–5, running locally by hour 3 and deployed by hour 12.
+
+**Libraries you will use.** `requests` (calls Horizons), `numpy` (visibility arrays), `fastapi` + `uvicorn` (the web API: you write plain Python functions and FastAPI turns them into URLs that return JSON). Install with `pip install fastapi uvicorn requests numpy`.
+
+**Tasks**
+
+- [ ] Hour 0–1: write `sites.json` (contract 1) with 8–12 sites: the nine NASA candidate regions, Shackleton connecting ridge, and 1–2 Apollo sites as controls. Commit it early: C is waiting on it.
+- [ ] Try one Horizons query by hand in the [Horizons web app](https://ssd.jpl.nasa.gov/horizons/app.html): observer on the Moon (body 301), site coordinates, target Sun (10), quantity "apparent az & el". Copy the exact settings that work.
+- [ ] `horizons.py`: implement `azel(site, body, start, stop, step)` from the code starter. Parse the rows between `$$SOE` and `$$EOE`. Convert Horizons time strings to ISO UTC.
+- [ ] Cache every response to `backend/data/cache/` and commit the cache for your demo dates, so the deployed app never calls Horizons live.
+- [ ] Sanity check: at an Apollo site the Sun should climb to high elevation (60°+); at the pole it should stay within a few degrees of the horizon. Earth at the pole should hover near the horizon and barely move.
+- [ ] `metrics.py`: `visible()`, `longest_run()` and `summarize()` from the code starter, plus `next_set_h(visible, start_index)`, `both_windows(times, sun_vis, earth_vis)`, and `max_sun_el_deg` / `mean_sun_el_deg` (mean over sunlit hours only).
+- [ ] Write a few tiny tests for `metrics.py` with hand-made arrays (e.g. `[T, T, F, F, F, T]` → longest dark = 3). These catch most bugs.
+- [ ] `app.py`: `GET /sites`, `GET /ephemeris`, `GET /compare` exactly as in contracts 3–5. Enable CORS so B's dev server can call it. Return HTTP 400 with a clear message for an unknown site or a bad date.
+- [ ] Hour 5: sit with B, switch the frontend from mocks to your API, fix any mismatch **in the contract doc first**, then in code.
+- [ ] Hour 8–10: load `masks/{site_id}.json` when `horizon=terrain`; fall back to flat (and say so in the response) if the file is missing.
+- [ ] Hour 10–12: deploy (Render or Railway), with the cache and masks included. Give B the public URL.
+
+**How to validate**
+
+- Run `uvicorn app:app --reload` and open `http://localhost:8000/docs`: FastAPI generates a page where you can try every endpoint in the browser.
+- Compare one site's flat-horizon `pct_sunlit` with your own hand count over a few days of the raw cache.
+- `horizon=terrain` should give **less or equal** sunlight than `flat` at most sites. More sunlight is possible only at a peak (negative mask), so check any big increase.
+- Run the demo queries (Haworth vs Malapert vs Nobile Rim 1, plus the same dates shifted two weeks) with the network off: they must still work from cache.
+
+**Known pitfalls**
+
+- Commas in `SITE_COORD` must be URL-encoded; `requests` does this for you if you pass `params=`. Don't build the URL by hand.
+- Check the az/el quantity code in the Horizons manual (usually `QUANTITIES='4'`) and that `ANG_FORMAT='DEG'` gives decimal degrees.
+- Horizons returns an error message inside `result` with HTTP 200. Check for `$$SOE` and raise a clear error if it is missing.
+- Keep `lon_e` east-positive 0–360 everywhere; Horizons `SITE_COORD` expects east longitude first.
+- Time zones: keep everything in UTC.
+
+**Definition of done**
+
+- [ ] All three endpoints match contracts 3–5 exactly, checked against B's mock files.
+- [ ] The Apollo and pole sanity checks pass.
+- [ ] `metrics.py` tests pass.
+- [ ] The demo works offline from the committed cache.
+- [ ] Deployed backend URL is shared with B and written in this README.
+
+---
+
+### Lane B: frontend (easiest technically, most polish)
+
+**Goal.** The one screen a planner uses: pick sites and dates, see the Sun and Earth over the horizon, and compare sites at a glance. You can build all of it from mock data before the backend exists.
+
+**You own.** Everything in `frontend/`, the frontend deployment and the demo video. Possibly the README and submission, if moved from C.
+
+**Inputs.** Contracts 3–5. Mock files first, A's local API from hour 5, A's deployed URL at the end.
+
+**Outputs.** A deployed web app (Vercel or Netlify) and a 30–60 s demo video.
+
+**Libraries you will use.** Vite (dev server and build tool), React + TypeScript (UI components with typed data), Plotly via `react-plotly.js` (charts; `scatterpolar` draws the sky dome). Start with `npm create vite@latest frontend -- --template react-ts`, then `npm install plotly.js react-plotly.js`.
+
+**Tasks**
+
+- [ ] Hour 0–1: create the Vite app. Write TypeScript types that mirror contracts 3–5 exactly (`Site`, `EphemerisResponse`, `CompareResponse`).
+- [ ] Write mock JSON for 3 sites in `src/mock/`, matching the contracts field for field. Make one site clearly better so the "best value" highlight is testable.
+- [ ] One `api.ts` file with `getSites()`, `getEphemeris()`, `getCompare()`. A single flag switches between mocks and the real base URL (an env var like `VITE_API_URL`).
+- [ ] Site multi-select (2–4 sites, grouped by `group`) + date range picker + flat/terrain toggle.
+- [ ] **Polar sky plot** (the signature visual): Plotly `scatterpolar` with `r = 90 − elevation`, `theta = azimuth`, angular axis clockwise with 0° at the top (`angularaxis: {rotation: 90, direction: "clockwise"}`). Draw the horizon mask as a filled band from `r = 90 − mask` out to the edge, then the Sun and Earth tracks on top.
+- [ ] **Timeline strip**: three rows (Sun, Earth, both), one cell per hour, coloured when visible. A heatmap or shapes in Plotly both work.
+- [ ] **Metric cards + comparison table**: one row per site with the `/compare` fields. Highlight the best value per column (highest for `pct_*`, lowest for `longest_*`).
+- [ ] Show `horizon` clearly: if the API fell back to flat, label it "flat horizon (terrain not available)".
+- [ ] Hour 5: switch to the real API with A and fix mismatches.
+- [ ] Stretch, in this order (cut from the bottom if behind): "best landing window" highlight from `both_windows`, "Explain it" panel for students, animation scrubber, map view, mast-height slider.
+- [ ] Hour 10–12: deploy, set `VITE_API_URL` to A's URL, add a footer crediting NASA/JPL Horizons and LOLA/PGDA, record the demo (script in "Demo, submission and resume").
+
+**How to validate**
+
+- The sky plot must put north at the top and east to the right (clockwise). Check with a fake point at az 90°, el 45°: it should sit halfway out on the right.
+- At an Apollo control site the Sun track should reach near the centre of the dome; at a pole site it should hug the edge. If not, `r` is probably inverted.
+- Toggling flat/terrain should change the numbers and the shaded horizon band.
+- Test at phone width; judges often open links on phones.
+
+**Known pitfalls**
+
+- Plotly's polar plot defaults to counter-clockwise with 0° on the right. Set `rotation` and `direction` explicitly.
+- Azimuth wraps at 360 → 0. Break the track line there, or Plotly draws a line straight across the dome.
+- Large arrays (720 hours × 4 sites) are fine for Plotly, but don't re-render on every keystroke: fetch only when the user clicks "Compare" or the inputs settle.
+- CORS errors in the browser console mean A needs to enable CORS, not a frontend bug.
+
+**Definition of done**
+
+- [ ] Every MVP feature in the Features table works against the real API.
+- [ ] The app works deployed, at phone width, with credits in the footer.
+- [ ] The demo video is recorded (under 2 minutes) and linked on the project page.
+
 ## Code starter
 
 Three small modules cover the whole backend. This is untested starter code, so run the sanity checks in the schedule before you build on it.
