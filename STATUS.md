@@ -9,7 +9,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | done | Backend deployed: https://lunar-site-navigator-api.onrender.com. Waiting on C to rebuild 2 masks, then final check | `main` | Waiting on C (2 masks) | Sat 12:03 |
-| B | Frontend | in review | Full UI on the real API in PR #11; waiting on deploy URL + stale masks | `frontend/ui` (PR #11) | Partly: see B section | Sat 11:55 |
+| B | Frontend | in review | All lane-B features done in PR #11; final snapshot + demo after A/C move 2 sites | `frontend/ui` (PR #11) | Waiting: PR #11 review, Pages setting, haworth/malapert move | Sat 12:05 |
 | C (Lucas) | Terrain horizon masks | working | Haworth point is outside its official region (#15); waiting on A to move haworth + malapert_massif | `claude/project-thread-mabu61` | Waiting on A (2 coordinates) | Sat 12:07 |
 
 ---
@@ -29,19 +29,19 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 ## B: frontend
 
-- **Status:** in review
-- **Current task:** MVP and most stretch features done and tested against the real backend on `main`; waiting on the items below
-- **Branch / PR:** `frontend/ui`, [PR #11](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/11) (needs a review). PR #5 (scaffold) merged
-- **Done so far:** site picker, dates, landing time, flat/terrain toggle; sky dome per site; timeline strip; metric cards + comparison table with best-per-column; flat-fallback label; best landing window finder; "How to read this" panel; animation scrubber; map of the south pole; credits footer. Works at phone width. Tested against `backend/` on `main` with `HORIZONS_OFFLINE=1`
-- **Next:** deploy the frontend once there is a backend URL; record the demo; mast-height slider if the contract change below is agreed
-- **Blocked on:** a deployed backend URL (A), and an account to deploy the frontend (see below)
+- **Status:** in review. Every lane-B feature is built and tested; only refreshes and deploy remain
+- **Current task:** waiting on the items below, then refresh the offline snapshot, deploy, and record the final demo
+- **Branch / PR:** `frontend/ui`, [PR #11](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/11). Includes `.github/workflows/frontend-pages.yml`
+- **Done so far:** all MVP features + every stretch feature (window finder, explain panel, animation scrubber, map with C's relief, **mast switch** using A's `mast_m`). **Offline snapshot:** the site works with no backend for 2026-11-17 to 2027-01-13 (identical to the live API on 60 random queries, incl. mast). **GitHub Pages deploy** workflow. **Scripted demo video** (`frontend/scripts/record_demo.cjs`; draft recorded)
+- **Next:** (1) once PR #11 is merged and Pages is on, check the live site on desktop + phone; (2) after A/C move haworth + malapert_massif, rerun `npm run snapshot` and re-record the demo; (3) if A gets a backend URL, set it as a repo variable
+- **Blocked on:** nothing I can do more on without the items below
 - **Needs from others:**
-  - **C: rebuild 4 stale masks.** Every mask on `main` was built at 16:31 UTC, but A moved 4 sites at 16:43 UTC (commit 9d30541). Stale: `haworth`, `mons_mouton_plateau`, `nobile_rim_1`, `de_gerlache_rim_2`. Haworth still shows 0% sunlit / 0% Earth with terrain on. Please rerun `python terrain/build_masks.py` and commit.
-  - **C: map backdrop (5 min).** You have the DEM, so please run `python frontend/scripts/make_basemap.py terrain/dem/LDEM_80S_80MPP_ADJ.TIF` (needs `pip install rasterio numpy pillow`) and commit the 2 files it writes in `frontend/public/basemap/`. The map works without them; this adds the shaded relief. My environment can't download the DEM.
-  - **A: deployed backend URL** as soon as it is up. I set it as `VITE_API_URL` when building the frontend. CORS is already open, so no change is needed.
-  - **A + C: mast-height slider (optional, needs a yes from both).** Proposed contract change: `/ephemeris` and `/compare` take an optional `mast_m` (0 or 10); the API reads `masks/{id}_h10.json` when `mast_m=10` and falls back to the 0 m mask otherwise. C already has `build_masks.py --mast 10`. Reply in chat; I'll update the README contract in the same PR.
-  - **Anyone: review [PR #11](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/11).**
-- **Updated:** Sat 11:55 ET
+  - **Anyone: review + merge [PR #11](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/11).** Only `frontend/` plus one new workflow file.
+  - **Repo admin (Siphrn), after #11 merges: Settings → Pages → Build and deployment → Source: "GitHub Actions".** The site then publishes to `https://siphrn.github.io/nasaSpaceAppChallenge/` on every push to `main`. No account or backend needed: it runs on the snapshot.
+  - **A + C: ping B when haworth + malapert_massif are moved and their masks rebuilt** (C's request above). I then refresh the snapshot so the deployed numbers match, and re-record the demo.
+  - **A (optional): backend URL.** No longer required for the demo. If you deploy, add the repo variable `VITE_API_URL` (Settings → Secrets and variables → Actions → Variables) and re-run the "Frontend to GitHub Pages" workflow; the site then uses the live API and falls back to the snapshot if it's down.
+  - **C (for the README/submission):** the demo story that is true in the data: landing at Mons Mouton on Dec 15 gives ~15 days of sun and Earth never sets; landing on Dec 29 instead, the Sun sets ~32 h after landing. Month-long % numbers barely change with a two-week shift (any 30-day window covers a full lunar day), so don't claim the table "re-ranks".
+- **Updated:** Sat 12:05 ET
 
 ## C: terrain horizon masks (Lucas)
 
@@ -65,6 +65,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:05 · B · PR #11 has every frontend feature + mast switch, offline snapshot, Pages deploy, demo recorder. Waiting on: PR #11 review, Pages setting, haworth/malapert move.
 - Sat 12:03 · A · Backend deployed: https://lunar-site-navigator-api.onrender.com (B: use as VITE_API_URL). Moved haworth + malapert_massif (#17); waiting on C to rebuild those 2 masks.
 - Sat 12:07 · C · Quickmap check: Haworth point is ~60 km outside the official region (#15). Asking A to move haworth and malapert_massif.
 - Sat 12:03 · C · #14 merged: Sun/Earth check of masks (ridge 100% sunlit; A's negative-mask question answered: real), README Limitations. Asking A to move Malapert 1.6 km out of a summit crater.
