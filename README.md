@@ -1,4 +1,94 @@
-# Lunar Landing Site Navigator — One-Day Build Plan
+# Lunar Landing Site Navigator
+
+**When does a lunar south-pole landing site have sunlight for power and Earth in view for radio?** Pick 2–4 candidate sites and a date range, and the app answers in seconds, using real NASA terrain and real Sun and Earth positions.
+
+**Live app:** <https://siphrn.github.io/nasaSpaceAppChallenge/> · **API:** <https://lunar-site-navigator-api.onrender.com> ([docs](https://lunar-site-navigator-api.onrender.com/docs)) · Built for the [NASA Space Apps Challenge 2026: Lunar Landing Site Navigator](https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/?tab=details)
+
+![The app comparing Mons Mouton, Malapert Massif and Nobile Rim 1](docs/img/app_overview.png)
+
+## Why it matters
+
+At the Moon's south pole the Sun never climbs more than a few degrees. It circles the horizon, so a crater rim or a mountain can hide it for days. Earth hangs right on the horizon too. Moving a lander a kilometre, or slipping the launch two weeks, can turn steady solar power into a 14-day night, or cut radio contact with Earth. Planners answer these questions today by juggling Quickmap, Moon Trek and JPL Horizons. This app puts the answer on one screen.
+
+## What it does
+
+- **Compare sites side by side:** % of time sunlit, longest night (which sets battery size), % of time Earth is in view, longest radio blackout, and the hours both are up. The best value in each column is highlighted.
+- **Sky dome per site:** the real terrain horizon in every compass direction, with the Sun's and Earth's paths over it.
+- **Timeline and landing time:** when each body is up, hour by hour, plus time left until sunset and Earthset after a chosen landing time.
+- **Best landing window:** the first stretch with both Sun and Earth up for at least N hours.
+- **Flat vs terrain switch:** shows how much the real landscape changes the answer. On a high point, terrain can *add* sunlight, because you see past the flat horizon.
+- **10 m mast switch:** what a solar-panel or antenna mast buys you.
+- **Map** of the south pole (LOLA shaded relief), an animation scrubber, and a plain-language "How to read this" panel for students and the public.
+
+![Sky domes and timelines for three sites](docs/img/app_sky_timeline.png)
+
+## How it works
+
+```text
+  JPL Horizons API                      LOLA south-pole elevation map
+  (Sun + Earth az/el, hourly)           (80 m/px GeoTIFF, NASA PGDA)
+          |                                      |
+          v                                      v
+  backend/horizons.py                   terrain/horizon_mask.py
+  fetch once, cache to JSON             ray-cast the horizon at each site:
+          |                             360 directions x 150 km, with the
+          |                             Moon's curvature -> masks/*.json
+          +------------------+-------------------+
+                             v
+                  backend/metrics.py:  visible = elevation > horizon(azimuth)
+                  backend/app.py (FastAPI): /sites, /ephemeris, /compare
+                             v
+                  frontend/ (React + TypeScript + Plotly), on GitHub Pages
+                  (falls back to a built-in snapshot if the API is asleep)
+```
+
+1. **Where are the Sun and Earth?** JPL Horizons gives their azimuth and elevation from each site every hour. Responses are cached, so the app never depends on Horizons being up.
+2. **How high is the real horizon?** For each site we walk outward over NASA's LOLA laser-altimeter map in 360 directions, out to 150 km, and keep the steepest angle we see. Far terrain sinks because the Moon curves away (about 2.9 km of drop at 100 km), and we correct for that. The result is a 360-number "horizon mask" per site, plus one for a 10 m mast. Details and checks: [`terrain/README.md`](terrain/README.md), [`terrain/validate.md`](terrain/validate.md).
+3. **Compare.** A body is visible when it is above the mask in its direction. There is no atmosphere, so no refraction correction. The metrics come from those hourly yes/no values.
+
+**How we checked the terrain:** fake-Moon tests with mountains at known places; a second, independent method that must agree on every site; the Sun and Earth results against known facts (the Shackleton connecting ridge, known as one of the best-lit spots at the pole, comes out sunlit 100% of these summer weeks); and every site checked against NASA's official candidate-region outlines in Quickmap, which caught one point that sat outside its region and was then moved.
+
+## Data sources
+
+- [JPL Horizons API](https://ssd-api.jpl.nasa.gov/doc/horizons.html): Sun and Earth positions from lunar surface sites
+- [LOLA south-pole DEMs, NASA PGDA product 90](https://pgda.gsfc.nasa.gov/products/90) (Barker et al. 2021): `LDEM_80S_80MPP_ADJ.TIF`, 80 m/px
+- [LROC Quickmap](https://quickmap.lroc.asu.edu): NASA candidate landing-region outlines, used to check site positions
+
+## Run it locally
+
+```bash
+# backend (serves from the committed cache, no network needed)
+cd backend && pip install -r requirements.txt
+HORIZONS_OFFLINE=1 uvicorn app:app --port 8000
+
+# frontend
+cd frontend && npm ci
+VITE_API_URL=http://localhost:8000 npm run dev     # http://localhost:5173
+
+# terrain masks (optional: the JSON files are already committed)
+pip install -r terrain/requirements.txt
+# download LDEM_80S_80MPP_ADJ.TIF (181 MB) from PGDA into terrain/dem/, then:
+python terrain/build_masks.py --mast 10
+```
+
+## Limitations, in short
+
+Hourly sampling; an 80 m/px map (nearby small hills are smoothed); one exact point per candidate region (moving 1–2 km can change the answer a lot, which is the point of the app); the Sun's centre is what we test; cached dates run from 17 Nov 2026 to 14 Jan 2027, which is polar summer. Full list: [Limitations](#limitations).
+
+## Repo layout
+
+| Folder | What's in it |
+| --- | --- |
+| `frontend/` | React + TypeScript + Plotly app, offline snapshot, GitHub Pages workflow |
+| `backend/` | FastAPI app, Horizons fetch + cache, metrics, tests, `data/sites.json`, `data/masks/` |
+| `terrain/` | Horizon-mask ray-caster, build script, validation notes and tests |
+| `STATUS.md` | Team status log from the build day |
+
+The rest of this README is the one-day build plan we worked from: concepts, team split, the JSON contracts between the three parts, and the limitations.
+
+---
+
+# Appendix: one-day build plan
 
 _Build plan, Nov 14, 2026_
 
@@ -646,7 +736,7 @@ What the numbers do and don't capture. Use this to answer "how accurate is this?
 1. (0–10 s) The problem: "A launch slips two weeks. Is our landing site still viable?"
 2. (10–30 s) Pick Haworth vs Malapert vs Nobile Rim 1 and a date range. The sky plots and timelines appear.
 3. (30–45 s) Toggle flat vs terrain horizon and watch the % sunlit change. This shows why topography matters.
-4. (45–60 s) Shift the dates by two weeks and the comparison table re-ranks. End on the metrics cards.
+4. (45–60 s) Shift the landing time by two weeks and watch "time to sunset" change: landing at Mons Mouton on Dec 15 gives about 15 days of Sun with Earth never setting; landing on Dec 29 instead, the Sun sets about 32 h after landing. (Month-long % numbers barely move with a two-week shift, because any 30-day window covers a full lunar day, so don't claim the table re-ranks.) End on the metric cards.
 
 **Submission checklist**
 
