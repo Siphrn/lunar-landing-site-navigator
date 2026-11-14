@@ -8,7 +8,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
-| A | Data and backend | blocked | Backend done incl. `mast_m` (#13). Only deploy left | `main` | Yes: needs a Render/Railway account to deploy | Sat 11:54 |
+| A | Data and backend | done | Backend deployed: https://lunar-site-navigator-api.onrender.com. Waiting on C to rebuild 2 masks, then final check | `main` | Waiting on C (2 masks) | Sat 12:03 |
 | B | Frontend | in review | Full UI on the real API in PR #11; waiting on deploy URL + stale masks | `frontend/ui` (PR #11) | Partly: see B section | Sat 11:55 |
 | C (Lucas) | Terrain horizon masks | working | Haworth point is outside its official region (#15); waiting on A to move haworth + malapert_massif | `claude/project-thread-mabu61` | Waiting on A (2 coordinates) | Sat 12:07 |
 
@@ -16,14 +16,14 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 ## A: data and backend
 
-- **Status:** waiting (deploy needs a hosting account; everything else done)
-- **Current task:** deploy the backend (waiting for a Render or Railway account)
-- **Branch / PR:** #6, #7, #8, #9, #10, #13 all merged
-- **Done so far:** Backend complete on main: `sites.json`, `horizons.py` + offline cache, `metrics.py`, `app.py` (`/sites`, `/ephemeris`, `/compare`, terrain with flat fallback), 31 tests. **Terrain gate rerun on C's rebuilt masks (11:58): passes.** Terrain sunlight <= flat everywhere except nobile_rim_1, mons_mouton_plateau and de_gerlache_rim_2. There the extra hours are the Sun 0 to 3.4 deg below the flat horizon toward the pole (az 100 to 256), where those masks dip to -1.3 to -5.9 deg (high points on the Mons Mouton massif and the de Gerlache rim). Looks physical. **Mast slider (#13):** `mast_m=10` on `/ephemeris` and `/compare` reads `{site}_h10.json`, falls back to the 0 m mask, and returns `mast_m` (the height used). README contracts 4 and 5 updated. Deploy config + steps in `backend/WORKFLOW.md`
-- **Next:** deploy as soon as there is an account; give B the URL; write it in the README
-- **Blocked on:** a Render or Railway account to deploy with (asked our human lead)
-- **Needs from others:** B: `mast_m` is live on main; send `mast_m=10` with `horizon=terrain`, and read `mast_m` back per result for the label. C: in your Sun/Earth check, please eyeball the negative masks at nobile_rim_1 and mons_mouton_plateau (down to -5.9 deg toward az 100 to 256); they add up to 15 points of sunlight
-- **Updated:** Sat 11:54 ET
+- **Status:** done; waiting on C to rebuild 2 masks, then a final check on the live URL
+- **Current task:** waiting on C (masks for haworth and malapert_massif)
+- **Branch / PR:** #6, #7, #8, #9, #10, #13, #16, #17 all merged
+- **Done so far:** **Backend deployed: <https://lunar-site-navigator-api.onrender.com>** (Render free plan, auto-deploys from `main`, `HORIZONS_OFFLINE=1`). Checked on the public URL: demo queries, `mast_m=10`, 400/502, CORS. URL is in the README. Backend: `sites.json`, `horizons.py` + offline cache, `metrics.py`, `app.py` (terrain + `mast_m`), 31 tests. Terrain gate passes. **#17 (12:10):** moved `haworth` to -86.9737, 335.6129 (inside the official region) and `malapert_massif` to -86.0187, 2.2013 (out of the summit crater), as C asked; cache refetched
+- **Next:** when C's new masks are on main, Render redeploys automatically; I rerun the terrain gate on the live URL
+- **Blocked on:** **C:** please rebuild the 0 m and `_h10` masks for `haworth` and `malapert_massif` (sites moved in #17)
+- **Needs from others:** **B: backend URL for `VITE_API_URL` is `https://lunar-site-navigator-api.onrender.com`** (CORS open). Free plan: the first request after 15 idle minutes takes ~1 min to wake, so open it once before the demo. C: thanks for the profiles. nobile_rim_1 stays where it is for now (the runner-up point C suggested); flag it if Quickmap shows it is off the Nobile rim
+- **Updated:** Sat 12:03 ET
 
 ---
 
@@ -65,6 +65,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:03 · A · Backend deployed: https://lunar-site-navigator-api.onrender.com (B: use as VITE_API_URL). Moved haworth + malapert_massif (#17); waiting on C to rebuild those 2 masks.
 - Sat 12:07 · C · Quickmap check: Haworth point is ~60 km outside the official region (#15). Asking A to move haworth and malapert_massif.
 - Sat 12:03 · C · #14 merged: Sun/Earth check of masks (ridge 100% sunlit; A's negative-mask question answered: real), README Limitations. Asking A to move Malapert 1.6 km out of a summit crater.
 - Sat 11:54 · A · Terrain gate passes on C's rebuilt masks. `mast_m` merged (#13), slider unblocked for B. Only deploy left; waiting on a hosting account.
