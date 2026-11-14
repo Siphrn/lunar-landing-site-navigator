@@ -10,7 +10,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | working | `app.py` endpoints; `sites.json` in PR #6 | `backend/lane-a-workflow` | No | Sat 11:32 |
 | B | Frontend | working | Site/date picker + sky plot on mock data | `frontend/scaffold` (PR #5), `frontend/ui` | No | Sat 11:25 |
-| C (Lucas) | Terrain horizon masks | in review | First masks for all sites (placeholder coords), PR #4 open | `claude/project-thread-mabu61` | Waiting on A's `sites.json` | Sat 11:26 |
+| C (Lucas) | Terrain horizon masks | in review | Masks rebuilt with A's site list, PR #4 | `claude/project-thread-mabu61` | No | Sat 11:41 |
 
 ---
 
@@ -41,13 +41,13 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 ## C: terrain horizon masks (Lucas)
 
 - **Status:** in review
-- **Current task:** first masks for all 10 polar sites, PR #4 open; waiting on real site coordinates
+- **Current task:** masks for all 10 polar sites, rebuilt from A's `sites.json` (PR #6); PR #4 needs a review
 - **Branch / PR:** `claude/project-thread-mabu61` ([PR #4](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/4))
-- **Done so far:** 80 m/px LOLA DEM read and checked (metres, polar stereo, NaN nodata); ray-caster with curvature; masks for 10 sites in `backend/data/masks/`; direction checks pass (fake-Moon tests + two independent methods agree, see `terrain/validate.md`)
-- **Next:** rerun with A's `sites.json` (takes ~10 s), Quickmap screenshot check, optional 10 m mast masks
-- **Blocked on:** final masks wait on A's `backend/data/sites.json` (real coordinates + IDs)
-- **Needs from others:** A: commit `backend/data/sites.json`. Current masks use placeholder IDs/coords from `terrain/sites_fallback.json`
-- **Updated:** Sat 11:26 ET
+- **Done so far:** ray-caster with curvature on the 80 m/px LOLA DEM; masks keyed by A's IDs in `backend/data/masks/`; direction checks pass (see `terrain/validate.md`)
+- **Next:** Quickmap screenshot check; optional 10 m mast masks; rerun if A changes coordinates
+- **Blocked on:** nothing
+- **Needs from others:** A: some points sit in craters or on steep slopes (haworth is on Haworth's crater floor, permanently dark; mons_mouton_plateau, nobile_rim_1, de_gerlache_rim_2 sit on 23-26° slopes). Consider nudging them onto the rim/plateau top. Someone: review PR #4
+- **Updated:** Sat 11:41 ET
 
 ---
 
@@ -55,6 +55,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 11:41 · C · Masks rebuilt with A's site IDs/coords from PR #6 (PR #4). Flagged 4 points that sit in craters or on steep slopes.
 - Sat 11:32 · A · horizons.py + offline cache done (Dec 2026 ± 2 weeks, all sites). Starting app.py.
 - Sat 11:30 · A · Unblocked: Horizons is reachable. sites.json PR #6 open, IDs final.
 - Sat 11:27 · A · sites.json (12 sites) and metrics.py + tests done on `backend/lane-a-workflow`; blocked on Horizons network access.
