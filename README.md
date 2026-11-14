@@ -2,7 +2,7 @@
 
 **When does a lunar south-pole landing site have sunlight for power and Earth in view for radio?** Pick 2–4 candidate sites and a date range, and the app answers in seconds, using real NASA terrain and real Sun and Earth positions.
 
-**Live app:** <https://siphrn.github.io/nasaSpaceAppChallenge/> · **30-second demo:** [docs/demo.mp4](docs/demo.mp4) · **API:** <https://lunar-site-navigator-api.onrender.com> ([docs](https://lunar-site-navigator-api.onrender.com/docs)) · Built for the [NASA Space Apps Challenge 2026: Lunar Landing Site Navigator](https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/?tab=details)
+**Live app:** <https://siphrn.github.io/lunar-landing-site-navigator/> · **30-second demo:** [docs/demo.mp4](docs/demo.mp4) · **API:** <https://lunar-site-navigator-api.onrender.com> ([docs](https://lunar-site-navigator-api.onrender.com/docs)) · Built for the [NASA Space Apps Challenge 2026: Lunar Landing Site Navigator](https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/?tab=details)
 
 ![The app comparing Mons Mouton, Malapert Massif and Nobile Rim 1](docs/img/app_overview.png)
 
