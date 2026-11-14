@@ -73,9 +73,10 @@ const phrase = (body, cell) =>
   await caption("Compare sites: hours of sunlight for power, Earth in view for radio, longest night");
   await wait(3000);
   await scrollTo(".cards", 120);
+  await wait(700); // let the smooth scroll finish, or the click below scrolls the play button to the bottom edge
   await page.click(".play");
   await caption("The Sun (orange) and Earth (blue) against the real crater-rim horizon (brown)");
-  await wait(3500);
+  await wait(3300);
   await page.click(".play");
 
   // flat vs terrain: caption quotes the biggest change, read off the page
