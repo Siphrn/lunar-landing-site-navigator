@@ -75,6 +75,10 @@ python terrain/build_masks.py --mast 10
 
 Hourly sampling; an 80 m/px map (nearby small hills are smoothed); one exact point per candidate region (moving 1–2 km can change the answer a lot, which is the point of the app); the Sun's centre is what we test; cached dates run from 17 Nov 2026 to 14 Jan 2027, which is polar summer. Full list: [Limitations](#limitations).
 
+## Use of AI
+
+Code and documentation in this repository were written with help from Anthropic's Claude (Claude Code), used as a coding assistant by each of the three team members. The team chose the approach, checked the results against NASA tools (JPL Horizons, LROC Quickmap) and reviewed every merge. All data shown comes from the NASA sources above; no images, audio or video here are AI-generated (the screenshots are of the running app).
+
 ## Repo layout
 
 | Folder | What's in it |

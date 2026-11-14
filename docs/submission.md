@@ -1,31 +1,29 @@
-# Space Apps 2026 submission text (copy-paste)
+# Space Apps 2026 submission (copy-paste, matches the form)
 
-Draft for the Space Apps project page. Each heading is a field on the form;
-check the field names on the page itself, since they may differ slightly.
-Fill in the two links marked TODO before submitting.
+Each heading below is one field on the Space Apps project form, in order.
 
-## Project name
+## Project Name
 
 Lunar Landing Site Navigator
 
-## Challenge
-
-Lunar Landing Site Navigator
-
-## High-level project summary
+## Summary  (field limit 1,500 characters; this is about 950, 167 words)
 
 At the Moon's south pole the Sun never rises more than a few degrees. It circles the horizon, so a crater rim can hide it for days, and Earth sits right on the horizon too. Moving a lander a kilometre, or slipping a launch two weeks, can turn steady solar power into a two-week night or cut radio contact. Our web app lets a mission planner, a teacher or a curious student pick 2–4 candidate south-pole sites and a date range, and see in seconds when each site has sunlight for power and Earth in view for radio. It uses real Sun and Earth positions from JPL Horizons and real terrain from NASA's LOLA laser altimeter: we compute each site's true horizon in every direction, including the Moon's curvature, so the answers reflect the actual landscape rather than a flat Moon. Side-by-side metrics (% sunlit, longest night, % Earth in view, longest blackout, best landing window, time to sunset after landing) make site and date trade-offs obvious.
 
-## Link to final project
+## Project Demonstration
 
-- Live app: https://siphrn.github.io/nasaSpaceAppChallenge/
-- Code: https://github.com/Siphrn/nasaSpaceAppChallenge
+**Rule: a video of 30 seconds or less, or at most 7 slides, at a public link with no login.**
+B's current recording is about 69 s, too long for Global Award eligibility. B is cutting a 30-second version.
 
-## Link to project demo
+TODO: paste the link to the 30-second video (YouTube unlisted, or the file on GitHub).
 
-TODO: demo video link (YouTube, unlisted)
+## Project
 
-## Project details
+https://siphrn.github.io/nasaSpaceAppChallenge/
+
+(Code: https://github.com/Siphrn/nasaSpaceAppChallenge. The live app links to the repo, and the repo README links to the app.)
+
+## Project Details
 
 **What it does.** One screen answers: "At this site, on these dates, when do we have sunlight and Earth in view?" Pick sites from NASA's Artemis III candidate regions (plus the Shackleton connecting ridge and two Apollo sites as near-equator controls), choose dates and a landing time, and compare:
 
@@ -52,22 +50,34 @@ Each site gets a sky dome (the real terrain horizon with the Sun's and Earth's p
 
 **Limitations.** Hourly sampling; 80 m terrain resolution (small nearby hills are smoothed); one exact point per candidate region; the Sun's centre is tested, not its disc; cached dates cover 17 Nov 2026 to 14 Jan 2027 (polar summer).
 
-## Use of artificial intelligence
+**Use of Super Intelligence tools.** Code and documentation in this project were written with help from Anthropic's Claude (Claude Code), as stated in the repository README. The screenshots are of our own running app; no images, audio or video in the project are AI-generated.
 
-Yes. Our team used Anthropic's Claude (Claude Code) as a coding assistant throughout: to write and test code for the backend, the frontend and the terrain ray-caster, to draft documentation, and to help plan and coordinate the work. Team members set the goals, made the design decisions, checked results against NASA tools such as LROC Quickmap, and reviewed what was merged. No AI-generated images, video or data are presented as NASA data; all data shown comes from the NASA sources listed below.
+## Use of Super Intelligence (SI)  (checkboxes, not seen by judges)
 
-## NASA data
+Tick:
+- Coding, Debugging, or Troubleshooting
+- Ideation or Brainstorming
+- Research or Information Gathering
+- Data Analysis and Interpretation
 
-- JPL Horizons System (ephemerides of the Sun and Earth from lunar surface sites): https://ssd-api.jpl.nasa.gov/doc/horizons.html
-- LRO LOLA south-pole digital elevation models, NASA Planetary Geodesy Data Archive (PGDA) product 90, Barker et al. 2021: https://pgda.gsfc.nasa.gov/products/90
-- NASA Artemis III candidate landing regions (as shown in LROC Quickmap): https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/
+(Do not tick image, video or audio generation: none of those are AI-generated.)
 
-## Space agency partner and other data
+## NASA Data  (one row per link: Link Text | Link URL)
 
-- LROC Quickmap (Arizona State University / NASA LRO), used to check site positions against candidate-region outlines: https://quickmap.lroc.asu.edu
+| Link Text | Link URL |
+| --- | --- |
+| JPL Horizons System API (Sun and Earth positions from lunar surface sites) | https://ssd-api.jpl.nasa.gov/doc/horizons.html |
+| LRO LOLA south-pole elevation models, NASA PGDA product 90 (Barker et al. 2021) | https://pgda.gsfc.nasa.gov/products/90 |
+| NASA Artemis III candidate landing regions | https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/ |
 
-## References
+## Space Agency Partner & Other Data  (Link Text | Link URL)
 
-- Barker, M. K., et al. (2021). Improved LOLA elevation maps for south pole landing sites. Planetary and Space Science. (PGDA product 90)
-- JPL Horizons API documentation: https://ssd-api.jpl.nasa.gov/doc/horizons.html
-- NASA Space Apps 2026 challenge: https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/
+| Link Text | Link URL |
+| --- | --- |
+| LROC Quickmap (ASU / NASA LRO), candidate-region outlines used to check site positions | https://quickmap.lroc.asu.edu |
+| Plotly (charts) | https://plotly.com/javascript/ |
+| React | https://react.dev |
+| FastAPI | https://fastapi.tiangolo.com |
+| rasterio (reading the elevation map) | https://rasterio.readthedocs.io |
+| pyproj (map projections) | https://pyproj4.github.io/pyproj/ |
+| Claude Code (AI coding assistant, Anthropic) | https://www.anthropic.com/claude-code |
