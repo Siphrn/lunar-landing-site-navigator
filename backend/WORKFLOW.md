@@ -93,3 +93,24 @@ If I am more than 30 minutes behind at any sync, I say so in `STATUS.md` and tea
 | ~3:15 | B | Local API URL, and the run command (`uvicorn app:app --reload` in `backend/`) |
 | 4:00–5:30 | C | Confirmation that `horizon=terrain` reads their files |
 | ~7:00 | B | Deployed backend URL |
+
+## Deploy (ready; needs someone with a Render or Railway account)
+
+The backend serves only from the committed cache when `HORIZONS_OFFLINE=1`, so the deployed app never calls Horizons. Dates outside Nov 17 2026 to Jan 14 2027 return HTTP 502 with a clear message.
+
+**Render** (New > Web Service > this repo):
+
+| Setting | Value |
+| --- | --- |
+| Root directory | `backend` |
+| Runtime | Python (version from `backend/.python-version`) |
+| Build command | `pip install -r requirements.txt` |
+| Start command | `uvicorn app:app --host 0.0.0.0 --port $PORT` |
+| Environment variable | `HORIZONS_OFFLINE=1` |
+| Health check path | `/sites` |
+
+**Railway**: new project from this repo, set the root directory to `backend`. It picks up `Procfile` (which already sets `HORIZONS_OFFLINE=1`).
+
+After it is up, check from a phone: `<url>/compare?sites=haworth,malapert_massif,nobile_rim_1&start=2026-12-01&stop=2026-12-31&horizon=terrain`. Then give B the URL for `VITE_API_URL` and write it in the README.
+
+Local dev: `pip install -r requirements-dev.txt`, then `pytest` and `uvicorn app:app --reload`.
