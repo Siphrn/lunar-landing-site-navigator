@@ -1,0 +1,4 @@
+terrain/dem/
+*.TIF
+*.tif
+__pycache__/
