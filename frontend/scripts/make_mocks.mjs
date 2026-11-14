@@ -1,7 +1,7 @@
 // Generates fake API responses in src/mock/ that match README contracts 3–5.
 // The Sun/Earth tracks are synthetic (rough polar geometry), NOT real ephemerides.
 // Run: node scripts/make_mocks.mjs
-import { writeFileSync } from "node:fs";
+import { readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 
 const OUT = new URL("../src/mock/", import.meta.url);
 const START = Date.parse("2026-12-01T00:00:00Z");
@@ -11,19 +11,22 @@ const LAND_AT_INDEX = 4 * 24 + 12; // 2026-12-05T12:00:00Z
 const SYNODIC_H = 29.53 * 24;
 const LIBRATION_H = 27.2 * 24;
 
-const sites = [
-  { id: "haworth", name: "Haworth", lat: -87.45, lon_e: 355.0, group: "candidate", note: "MOCK DATA: NASA Artemis candidate region" },
-  { id: "malapert", name: "Malapert Massif", lat: -86.0, lon_e: 2.9, group: "candidate", note: "MOCK DATA: NASA Artemis candidate region (best site in the mocks)" },
-  { id: "nobile_rim_1", name: "Nobile Rim 1", lat: -85.4, lon_e: 37.4, group: "candidate", note: "MOCK DATA: NASA Artemis candidate region" },
-  { id: "apollo11", name: "Apollo 11 (control)", lat: 0.674, lon_e: 23.473, group: "control", note: "MOCK DATA: near-equator control site" },
-];
+// Real site list from A (backend/data/sites.json); the tracks for each are synthetic.
+const sites = JSON.parse(readFileSync(new URL("../../backend/data/sites.json", import.meta.url), "utf8"));
 
-// Per-site fake terrain: base height + a few bumps (degrees). Malapert is a peak, so mostly low/negative.
-const maskShape = {
-  haworth: { base: 1.6, bumps: [[90, 2.5, 25], [200, 1.8, 30], [300, 1.2, 20]] },
-  malapert: { base: -0.8, bumps: [[150, 1.0, 20], [250, 0.6, 30]] },
-  nobile_rim_1: { base: 1.0, bumps: [[20, 3.0, 20], [120, 2.0, 35], [260, 2.5, 25]] },
-};
+// Fake terrain per site: base height + three bumps, seeded from the site id so it's stable.
+// Malapert Massif is a peak, so its base is negative (it sees past the flat horizon).
+function seeded(str) {
+  let h = 2166136261;
+  for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return () => ((h = Math.imul(h ^ (h >>> 15), 2246822507) >>> 0) / 2 ** 32);
+}
+function shapeFor(id) {
+  const rnd = seeded(id);
+  const base = id.startsWith("malapert") ? -0.8 : 0.4 + rnd() * 1.4;
+  const bumps = [0, 1, 2].map(() => [Math.floor(rnd() * 360), 0.6 + rnd() * 2.6, 15 + rnd() * 25]);
+  return { base, bumps };
+}
 
 const r1 = (x) => Math.round(x * 10) / 10;
 const r2 = (x) => Math.round(x * 100) / 100;
@@ -33,7 +36,7 @@ const iso = (i) => new Date(START + i * 3600e3).toISOString().replace(".000Z", "
 const times = Array.from({ length: HOURS }, (_, i) => iso(i));
 
 function makeMask(id) {
-  const s = maskShape[id];
+  const s = shapeFor(id);
   return Array.from({ length: 360 }, (_, az) => {
     let m = s.base;
     for (const [c, h, w] of s.bumps) {
@@ -108,6 +111,7 @@ function ephemeris(site, horizon) {
     stop: "2026-12-31T00:00:00Z",
     step_h: STEP_H,
     horizon: useTerrain ? "terrain" : "flat",
+    mast_m: 0,
     times,
     sun: { ...t.sun, visible: vis(t.sun) },
     earth: { ...t.earth, visible: vis(t.earth) },
@@ -122,6 +126,7 @@ function summary(site, e) {
     site: site.id,
     name: site.name,
     horizon: e.horizon,
+    mast_m: 0,
     pct_sunlit: pct(sv),
     longest_dark_h: longestRun(sv, false) * STEP_H,
     pct_earth: pct(ev),
@@ -135,6 +140,7 @@ function summary(site, e) {
   };
 }
 
+for (const f of readdirSync(OUT)) if (f.endsWith(".json")) rmSync(new URL(f, OUT));
 const write = (name, obj) => writeFileSync(new URL(name, OUT), JSON.stringify(obj) + "\n");
 write("sites.json", sites);
 for (const horizon of ["flat", "terrain"]) {
@@ -147,5 +153,4 @@ for (const horizon of ["flat", "terrain"]) {
   write(`compare_${horizon}.json`, {
     start: times[0], stop: "2026-12-31T00:00:00Z", step_h: STEP_H, land_at: times[LAND_AT_INDEX], results,
   });
-  console.table(results.map(({ both_windows, ...r }) => ({ ...r, n_windows: both_windows.length })));
 }

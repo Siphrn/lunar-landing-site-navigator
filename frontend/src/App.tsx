@@ -1,152 +1,254 @@
-// Temporary smoke-test page: proves types, api.ts, mocks and Plotly all work.
-// Replace with the real layout (picker, sky plot, timeline, cards) next.
-import { useEffect, useState } from "react";
-import { getCompare, getEphemeris, getSites, USING_MOCKS } from "./api";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { dataSource, getCompare, getEphemeris, getSites, type DataSource } from "./api";
+import { HAS_SNAPSHOT, snapshotIndex } from "./snapshot";
+import CompareTable from "./components/CompareTable";
+import Controls, { MAX_SITES, type Query } from "./components/Controls";
+import Explain from "./components/Explain";
+import MapView from "./components/MapView";
+import Scrubber from "./components/Scrubber";
+import SiteCard from "./components/SiteCard";
+import WindowFinder from "./components/WindowFinder";
 import type { CompareResponse, EphemerisResponse, Horizon, Site } from "./types";
-import Plot from "./Plot";
 
-const RANGE = { start: "2026-12-01", stop: "2026-12-31", step_h: 1 };
-const LAND_AT = "2026-12-05T12:00:00Z";
+const DEFAULT_QUERY: Query = {
+  // Picked from real data: a peak with great Earth view, a massif, and a rim that never sees Earth.
+  sites: ["mons_mouton", "malapert_massif", "nobile_rim_1"],
+  start: "2026-12-01",
+  stop: "2026-12-31",
+  landAt: "2026-12-15T12:00",
+  horizon: "terrain",
+  mastM: 0,
+};
 
-/** Insert nulls where azimuth wraps 360 -> 0 so Plotly doesn't draw across the dome. */
-function breakAtWrap(az: number[], el: number[]) {
-  const theta: (number | null)[] = [];
-  const r: (number | null)[] = [];
-  az.forEach((a, i) => {
-    if (i > 0 && Math.abs(a - az[i - 1]) > 180) {
-      theta.push(null);
-      r.push(null);
-    }
-    theta.push(a);
-    r.push(90 - el[i]);
-  });
-  return { theta, r };
-}
+const toIso = (local: string) => (local ? `${local.length === 16 ? local + ":00" : local}Z` : undefined);
 
 export default function App() {
   const [sites, setSites] = useState<Site[]>([]);
-  const [siteId, setSiteId] = useState("haworth");
-  const [horizon, setHorizon] = useState<Horizon>("terrain");
-  const [eph, setEph] = useState<EphemerisResponse | null>(null);
+  const [draft, setDraft] = useState<Query>(DEFAULT_QUERY);
+  const [query, setQuery] = useState<Query | null>(null);
   const [cmp, setCmp] = useState<CompareResponse | null>(null);
+  const [ephs, setEphs] = useState<Record<string, EphemerisResponse>>({});
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(true);
+  const [minHours, setMinHours] = useState(72);
+  const [cursor, setCursor] = useState(-1); // index into the shared time axis
+  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(3);
+  const reqId = useRef(0);
+  const [source, setSource] = useState<DataSource>(dataSource());
+  const [snapRange, setSnapRange] = useState<{ min: string; max: string } | null>(null);
 
   useEffect(() => {
-    getSites().then(setSites).catch((e: Error) => setError(e.message));
+    if (!HAS_SNAPSHOT) return;
+    snapshotIndex()
+      .then((i) => {
+        // stop is exclusive, so the last pickable day is the one before it
+        const last = new Date(Date.parse(i.stop) - 86_400_000).toISOString().slice(0, 10);
+        setSnapRange({ min: i.start.slice(0, 10), max: last });
+      })
+      .catch(() => setSnapRange(null));
   }, []);
 
   useEffect(() => {
-    if (!sites.length) return;
-    const q = { ...RANGE, horizon };
-    Promise.all([getEphemeris(siteId, q), getCompare(sites.map((s) => s.id), q, LAND_AT)])
-      .then(([e, c]) => {
-        setEph(e);
-        setCmp(c);
+    getSites()
+      .then((list) => {
+        setSites(list);
+        setSource(dataSource());
+        // keep only default sites that actually exist (IDs may change after the 12:00 sync)
+        const ids = new Set(list.map((s) => s.id));
+        const picked = DEFAULT_QUERY.sites.filter((id) => ids.has(id));
+        const q = {
+          ...DEFAULT_QUERY,
+          sites: picked.length ? picked : list.slice(0, 3).map((s) => s.id),
+        };
+        setDraft(q);
+        setQuery(q);
       })
       .catch((e: Error) => setError(e.message));
-  }, [sites, siteId, horizon]);
+  }, []);
 
-  const sun = eph && breakAtWrap(eph.sun.az, eph.sun.el);
-  const earth = eph && breakAtWrap(eph.earth.az, eph.earth.el);
+  const run = useCallback(async (q: Query) => {
+    const id = ++reqId.current;
+    setLoading(true);
+    setError(null);
+    const range = {
+      start: q.start,
+      stop: q.stop,
+      step_h: 1,
+      horizon: q.horizon,
+      mast_m: q.mastM,
+    };
+    try {
+      const [c, ...es] = await Promise.all([
+        getCompare(q.sites, range, toIso(q.landAt)),
+        ...q.sites.map((s) => getEphemeris(s, range)),
+      ]);
+      if (id !== reqId.current) return; // a newer request finished first
+      setSource(dataSource());
+      setCmp(c);
+      setEphs(Object.fromEntries(es.map((e) => [e.site, e])));
+      // Start the scrubber at the landing time (or the start of the range).
+      const land = c.land_at ? (es[0]?.times.indexOf(c.land_at) ?? -1) : -1;
+      setCursor(land >= 0 ? land : 0);
+      setPlaying(false);
+    } catch (e) {
+      if (id === reqId.current) setError((e as Error).message);
+    } finally {
+      if (id === reqId.current) setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (query) void run(query);
+  }, [query, run]);
+
+  const onHorizon = (h: Horizon) => {
+    // Horizon toggles apply immediately: it's the key demo moment.
+    const next = { ...draft, horizon: h };
+    setDraft(next);
+    setQuery(next);
+  };
+
+  const onMast = (m: number) => {
+    const next = { ...draft, mastM: m };
+    setDraft(next);
+    setQuery(next);
+  };
+
+  const toggleSite = (id: string) => {
+    const on = draft.sites.includes(id);
+    if (!on && draft.sites.length >= MAX_SITES) return;
+    setDraft({
+      ...draft,
+      sites: on ? draft.sites.filter((x) => x !== id) : [...draft.sites, id],
+    });
+  };
+
+  /** Land at a chosen time: re-run with the same sites, dates and horizon. */
+  const landAt = (iso: string) => {
+    const next = { ...(query ?? draft), landAt: iso.slice(0, 16) };
+    setDraft(next);
+    setQuery(next);
+  };
+
+  const dirty = JSON.stringify(draft) !== JSON.stringify(query);
+
+  // All sites share one time axis (same start, stop and step), so use the first one's.
+  const times = useMemo(() => Object.values(ephs)[0]?.times ?? [], [ephs]);
+  const cursorIso = cursor >= 0 && cursor < times.length ? times[cursor] : null;
+  const pickTime = useCallback(
+    (iso: string) => {
+      const i = times.indexOf(iso);
+      if (i >= 0) {
+        setPlaying(false);
+        setCursor(i);
+      }
+    },
+    [times],
+  );
+  const landAtIso = cmp?.land_at ?? toIso(query?.landAt ?? "") ?? null;
 
   return (
-    <main>
-      <h1>Lunar Landing Site Navigator</h1>
-      <p className="muted">
-        Smoke test · data source: <strong>{USING_MOCKS ? "mock files (fake numbers)" : import.meta.env.VITE_API_URL}</strong>
-      </p>
-      {error && <p className="error">{error}</p>}
-
-      <div className="controls">
-        <label>
-          Site{" "}
-          <select value={siteId} onChange={(e) => setSiteId(e.target.value)}>
-            {sites.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Horizon{" "}
-          <select value={horizon} onChange={(e) => setHorizon(e.target.value as Horizon)}>
-            <option value="terrain">terrain</option>
-            <option value="flat">flat</option>
-          </select>
-        </label>
-        {eph && horizon === "terrain" && eph.horizon === "flat" && (
-          <span className="badge">flat horizon (terrain not available)</span>
-        )}
-      </div>
-
-      {eph && sun && earth && (
-        <Plot
-          data={[
-            ...(eph.mask_deg
-              ? [
-                  {
-                    type: "scatterpolar" as const,
-                    theta: [...eph.mask_deg.map((_, i) => i * (360 / eph.mask_deg!.length)), 0],
-                    r: [...eph.mask_deg.map((m) => 90 - m), 90 - eph.mask_deg[0]],
-                    mode: "lines" as const,
-                    name: "terrain horizon",
-                    line: { color: "#8a6d4b" },
-                  },
-                ]
-              : []),
-            { type: "scatterpolar", theta: sun.theta, r: sun.r, mode: "lines", name: "Sun", line: { color: "#f5a623" } },
-            { type: "scatterpolar", theta: earth.theta, r: earth.r, mode: "lines", name: "Earth", line: { color: "#3b82f6" } },
-          ]}
-          layout={{
-            title: { text: `Sky dome: ${eph.site} (${eph.horizon})` },
-            polar: {
-              angularaxis: { rotation: 90, direction: "clockwise" },
-              radialaxis: { range: [0, 90], tickvals: [0, 30, 60, 80, 90], ticktext: ["90°", "60°", "30°", "10°", "0°"] },
-            },
-            autosize: true,
-            margin: { t: 50, l: 30, r: 30, b: 30 },
-          }}
-          useResizeHandler
-          style={{ width: "100%", maxWidth: 520, height: 480 }}
-          config={{ displayModeBar: false }}
-        />
-      )}
-
-      {cmp && (
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Site</th>
-                <th>Horizon</th>
-                <th>% sunlit</th>
-                <th>Longest dark (h)</th>
-                <th>% Earth</th>
-                <th>Longest blackout (h)</th>
-                <th>% both</th>
-                <th>Next sunset (h)</th>
-                <th>Next Earthset (h)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cmp.results.map((r) => (
-                <tr key={r.site}>
-                  <td>{r.name}</td>
-                  <td>{r.horizon}</td>
-                  <td>{r.pct_sunlit}</td>
-                  <td>{r.longest_dark_h}</td>
-                  <td>{r.pct_earth}</td>
-                  <td>{r.longest_blackout_h}</td>
-                  <td>{r.pct_both}</td>
-                  <td>{r.next_sunset_h ?? "not up"}</td>
-                  <td>{r.next_earthset_h ?? "not up"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <>
+      <header className="top">
+        <div>
+          <h1>Lunar Landing Site Navigator</h1>
+          <p className="muted">When does a south-pole site have sunlight for power and Earth in view for radio?</p>
         </div>
-      )}
-    </main>
+        {source === "mock" && <span className="tag warn">Mock data: numbers are not real</span>}
+        {source === "snapshot" && (
+          <span
+            className="tag info"
+            title="Saved answers from the real API, computed in your browser. No backend needed."
+          >
+            Offline snapshot of real data{snapRange ? ` · ${snapRange.min} to ${snapRange.max}` : ""}
+          </span>
+        )}
+      </header>
+
+      <main>
+        <div className="top-grid">
+          <Controls
+            sites={sites}
+            draft={draft}
+            onDraft={setDraft}
+            onSubmit={() => setQuery(draft)}
+            onHorizon={onHorizon}
+            onMast={onMast}
+            loading={loading}
+            dirty={dirty}
+            dateLimits={source === "snapshot" ? snapRange : null}
+          />
+          <MapView sites={sites} selected={draft.sites} onToggle={toggleSite} full={draft.sites.length >= MAX_SITES} />
+        </div>
+
+        {error && <p className="error panel">{error}</p>}
+
+        <Explain />
+
+        {cmp && (
+          <>
+            <section>
+              <h2>Comparison</h2>
+              <CompareTable cmp={cmp} requested={query?.horizon ?? "terrain"} requestedMast={query?.mastM ?? 0} />
+            </section>
+
+            <section>
+              <h2>Best landing window</h2>
+              <WindowFinder cmp={cmp} minHours={minHours} onMinHours={setMinHours} onLand={landAt} />
+            </section>
+
+            <section>
+              <div className="section-head">
+                <h2>Sky and timeline</h2>
+                <label className="toggle">
+                  <input type="checkbox" checked={zoom} onChange={(e) => setZoom(e.target.checked)} />
+                  Zoom on the horizon
+                </label>
+              </div>
+              <p className="muted small">
+                Sky dome: north at top, east to the right, centre = straight overhead. Shaded band = terrain blocking
+                the sky. Markers show the Sun (●) and Earth (◆) at the time on the slider (red line on the timeline;
+                filled = visible, hollow = hidden). The dotted line is the landing time. Click a timeline to jump there.
+              </p>
+              {times.length > 0 && cursor >= 0 && (
+                <Scrubber
+                  times={times}
+                  index={Math.min(cursor, times.length - 1)}
+                  onIndex={setCursor}
+                  playing={playing}
+                  onPlaying={setPlaying}
+                  speed={speed}
+                  onSpeed={setSpeed}
+                  landIndex={cmp.land_at ? times.indexOf(cmp.land_at) : -1}
+                  stepH={cmp.step_h}
+                />
+              )}
+              <div className={`cards ${loading ? "stale" : ""}`}>
+                {cmp.results.map((m) => (
+                  <SiteCard
+                    key={m.site}
+                    metrics={m}
+                    eph={ephs[m.site]}
+                    requested={query?.horizon ?? "terrain"}
+                    requestedMast={query?.mastM ?? 0}
+                    landAt={landAtIso}
+                    cursor={cursorIso}
+                    onPick={pickTime}
+                    zoom={zoom}
+                  />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+      </main>
+
+      <footer>
+        Ephemerides: NASA/JPL Horizons. Terrain: LRO LOLA elevation models via NASA PGDA. Built for NASA Space Apps
+        Challenge 2026.
+      </footer>
+    </>
   );
 }
