@@ -119,15 +119,29 @@ Lucas checked Haworth (screenshot below, vertices saved in `regions.json`).
 Finding: our Haworth point had drifted ~60 km outside the region when we moved
 it off the crater floor onto the nearest open rim. `best_in_region.py` now picks
 the best point *inside* an outline; for Haworth that is −86.9737, 335.6129
-(mean horizon about 0°). The other regions still need their outlines checked.
+(mean horizon about 0°). A moved Haworth there (#17) and the mask was rebuilt (#18).
 
 ![Quickmap Haworth region](img/quickmap_haworth_region.png)
+
+**Nobile Rim 1:** our point (−85.6169, 37.9129) is **inside** the official
+outline (also in `regions.json`). Searching the whole region finds nothing
+clearly better: the best points have the same mean horizon (about −0.5°), so
+the point stays. Its 5.8 km ground height is simply how high this rim is.
+
+![Quickmap Nobile Rim 1 region](img/quickmap_nobile_rim_1_region.png)
+
+**Malapert:** Quickmap's nomenclature entry is Malapert *crater* (centre
+−85.0, 11.4, 72 km wide, spanning −85.99 to −83.97 lat). Our point
+(−86.0187, 2.2013) is just south of the crater's edge, on the massif that forms
+its southern rim, which is where the "Malapert Massif" region is. The candidate
+region outline itself was not checked.
 
 ## 6. Still to do
 
 - [x] Quickmap: Haworth region outline checked (section 5).
-- [ ] Region outlines for the other candidate sites (Malapert, Nobile Rim 1/2,
-      Mons Mouton, de Gerlache Rim 2, Slater Plain, Peak near Cabeus B).
+- [x] Nobile Rim 1 inside its outline; Malapert on the massif south of the crater.
+- [ ] Outlines not checked: Malapert Massif region, Nobile Rim 2, Mons Mouton,
+      Mons Mouton Plateau, de Gerlache Rim 2, Slater Plain, Peak near Cabeus B.
 - [x] Sun/Earth check with A's cache (section 4). Ridge 100% sunlit; Malapert
       low only because of its exact point (fix suggested to A).
 - [x] Rerun with A's coordinates (PR #6). Several points still sit on steep

@@ -2,6 +2,8 @@
 
 _Build plan, Nov 14, 2026_
 
+**Live backend:** <https://lunar-site-navigator-api.onrender.com> (API docs at [`/docs`](https://lunar-site-navigator-api.onrender.com/docs)). It serves from the committed cache only (Nov 17 2026 to Jan 14 2027). It is on Render's free plan, so the first request after 15 idle minutes takes about a minute while it wakes up.
+
 ## The challenge
 
 Build one screen that answers a planner's question in seconds: *at this south-pole site, on these dates, when do we have sunlight for power and Earth in view for radio?* Today that means juggling Quickmap, Moon Trek and JPL Horizons. The challenge says those tools are built for detailed analysis and are hard for non-specialists to use for quick comparisons ([challenge details](https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/?tab=details)).
@@ -398,7 +400,7 @@ Optional `mast_m` (mast height in metres; C ships `0` and `10`): with `horizon=t
 - [ ] The Apollo and pole sanity checks pass.
 - [ ] `metrics.py` tests pass.
 - [ ] The demo works offline from the committed cache.
-- [ ] Deployed backend URL is shared with B and written in this README.
+- [x] Deployed backend URL is shared with B and written in this README.
 
 ---
 
