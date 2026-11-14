@@ -24,9 +24,11 @@ interface Props {
   onHorizon: (h: Horizon) => void;
   loading: boolean;
   dirty: boolean;
+  /** When the data only covers some dates (offline snapshot), limit the pickers to them. */
+  dateLimits?: { min: string; max: string } | null;
 }
 
-export default function Controls({ sites, draft, onDraft, onSubmit, onHorizon, loading, dirty }: Props) {
+export default function Controls({ sites, draft, onDraft, onSubmit, onHorizon, loading, dirty, dateLimits }: Props) {
   const groups = (["candidate", "other", "control"] as SiteGroup[])
     .map((g) => ({ g, items: sites.filter((s) => s.group === g) }))
     .filter((x) => x.items.length);
@@ -50,7 +52,10 @@ export default function Controls({ sites, draft, onDraft, onSubmit, onHorizon, l
     >
       <fieldset className="sites">
         <legend>
-          Sites <span className="muted">({draft.sites.length}/{MAX_SITES}, pick 2–4 to compare)</span>
+          Sites{" "}
+          <span className="muted">
+            ({draft.sites.length}/{MAX_SITES}, pick 2–4 to compare)
+          </span>
         </legend>
         {groups.map(({ g, items }) => (
           <div key={g} className="site-group">
@@ -81,11 +86,23 @@ export default function Controls({ sites, draft, onDraft, onSubmit, onHorizon, l
       <div className="row">
         <label>
           From (UTC)
-          <input type="date" value={draft.start} onChange={(e) => onDraft({ ...draft, start: e.target.value })} />
+          <input
+            type="date"
+            min={dateLimits?.min}
+            max={dateLimits?.max}
+            value={draft.start}
+            onChange={(e) => onDraft({ ...draft, start: e.target.value })}
+          />
         </label>
         <label>
           To (UTC)
-          <input type="date" value={draft.stop} onChange={(e) => onDraft({ ...draft, stop: e.target.value })} />
+          <input
+            type="date"
+            min={dateLimits?.min}
+            max={dateLimits?.max}
+            value={draft.stop}
+            onChange={(e) => onDraft({ ...draft, stop: e.target.value })}
+          />
         </label>
         <label>
           Landing time (UTC)

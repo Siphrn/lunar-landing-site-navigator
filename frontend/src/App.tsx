@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getCompare, getEphemeris, getSites, USING_MOCKS } from "./api";
+import { dataSource, getCompare, getEphemeris, getSites, type DataSource } from "./api";
+import { HAS_SNAPSHOT, snapshotIndex } from "./snapshot";
 import CompareTable from "./components/CompareTable";
 import Controls, { MAX_SITES, type Query } from "./components/Controls";
 import Explain from "./components/Explain";
@@ -34,11 +35,25 @@ export default function App() {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(3);
   const reqId = useRef(0);
+  const [source, setSource] = useState<DataSource>(dataSource());
+  const [snapRange, setSnapRange] = useState<{ min: string; max: string } | null>(null);
+
+  useEffect(() => {
+    if (!HAS_SNAPSHOT) return;
+    snapshotIndex()
+      .then((i) => {
+        // stop is exclusive, so the last pickable day is the one before it
+        const last = new Date(Date.parse(i.stop) - 86_400_000).toISOString().slice(0, 10);
+        setSnapRange({ min: i.start.slice(0, 10), max: last });
+      })
+      .catch(() => setSnapRange(null));
+  }, []);
 
   useEffect(() => {
     getSites()
       .then((list) => {
         setSites(list);
+        setSource(dataSource());
         // keep only default sites that actually exist (IDs may change after the 12:00 sync)
         const ids = new Set(list.map((s) => s.id));
         const picked = DEFAULT_QUERY.sites.filter((id) => ids.has(id));
@@ -68,6 +83,7 @@ export default function App() {
         ...q.sites.map((s) => getEphemeris(s, range)),
       ]);
       if (id !== reqId.current) return; // a newer request finished first
+      setSource(dataSource());
       setCmp(c);
       setEphs(Object.fromEntries(es.map((e) => [e.site, e])));
       // Start the scrubber at the landing time (or the start of the range).
@@ -132,7 +148,15 @@ export default function App() {
           <h1>Lunar Landing Site Navigator</h1>
           <p className="muted">When does a south-pole site have sunlight for power and Earth in view for radio?</p>
         </div>
-        {USING_MOCKS && <span className="tag warn">Mock data: numbers are not real</span>}
+        {source === "mock" && <span className="tag warn">Mock data: numbers are not real</span>}
+        {source === "snapshot" && (
+          <span
+            className="tag info"
+            title="Saved answers from the real API, computed in your browser. No backend needed."
+          >
+            Offline snapshot of real data{snapRange ? ` · ${snapRange.min} to ${snapRange.max}` : ""}
+          </span>
+        )}
       </header>
 
       <main>
@@ -145,6 +169,7 @@ export default function App() {
             onHorizon={onHorizon}
             loading={loading}
             dirty={dirty}
+            dateLimits={source === "snapshot" ? snapRange : null}
           />
           <MapView sites={sites} selected={draft.sites} onToggle={toggleSite} full={draft.sites.length >= MAX_SITES} />
         </div>
