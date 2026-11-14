@@ -10,7 +10,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | blocked | Waiting on C: 4 masks to rebuild for moved sites. Backend done; deploy ready | `main` | Yes: waiting on C's mask rebuild, and a hosting account for deploy | Sat 11:47 |
 | B | Frontend | in review | Full UI on the real API in PR #11; waiting on deploy URL + stale masks | `frontend/ui` (PR #11) | Partly: see B section | Sat 11:55 |
-| C (Lucas) | Terrain horizon masks | working | Masks merged (#4); validation + better site points for A | — | No | Sat 11:46 |
+| C (Lucas) | Terrain horizon masks | working | Masks rebuilt for moved sites + 10 m mast masks + map backdrop merged (#12); next: Sun/Earth check, README limitations, Explain-it text | `claude/project-thread-mabu61` | No | Sat 11:53 |
 
 ---
 
@@ -46,13 +46,13 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 ## C: terrain horizon masks (Lucas)
 
 - **Status:** working
-- **Current task:** masks merged to `main` ([PR #4](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/4)); next is validation against Quickmap and the Sun/Earth sanity check
-- **Branch / PR:** next work on `claude/project-thread-mabu61`
-- **Done so far:** masks for all 10 polar sites in `backend/data/masks/`, keyed by `sites.json` IDs; ray-caster, build script, plot tool, tests (see `terrain/validate.md`); better nearby points for 4 sites in `terrain/suggested_points.md`
-- **Next:** Quickmap screenshot check; Sun/Earth sanity check once `/ephemeris` works; optional 10 m mast masks; rerun masks if A changes coordinates
+- **Current task:** Sun/Earth sanity check of the masks with A's cache; then README limitations section and "Explain it" text
+- **Branch / PR:** `claude/project-thread-mabu61`. [#12](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/12) merged
+- **Done so far:** all 10 polar masks on `main` match the current `sites.json` (4 moved sites rebuilt in #12). `{site}_h10.json` (10 m mast) for every polar site. Map backdrop `frontend/public/basemap/` made from the DEM (for B; I block-averaged the full-res DEM because `Resampling.average` on the COG drew a tile grid. B: consider the same change in `make_basemap.py`)
+- **Next:** Sun/Earth check; README limitations; "Explain it" text (will put it in `docs/explain_it.md` for B to drop into the panel); final README + submission prep at 6:00
 - **Blocked on:** nothing
-- **Needs from others:** A: read `terrain/suggested_points.md` (haworth is on a crater floor and never sunlit; 3 other points sit on 23-26° slopes) and decide on new coordinates. A: `backend/data/masks/{id}.json` is ready for `horizon=terrain`
-- **Updated:** Sat 11:46 ET
+- **Needs from others:** A: rerun the terrain gate on the new masks. A + B: mast slider is a yes from C: the `_h10` files are on `main`, same format as contract 2 with `site_height_m: 10`. Tell C if any site's coordinates change again (C reruns masks in ~10 s)
+- **Updated:** Sat 11:53 ET
 
 ---
 
@@ -60,6 +60,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 11:53 · C · #12 merged: 4 masks rebuilt for the moved sites, 10 m mast masks for all sites, map backdrop for B. A and B no longer waiting on C.
 - Sat 11:55 · B · Full frontend on the real API in PR #11 (MVP + window finder, scrubber, map). Waiting on: C to rebuild 4 stale masks + make the map backdrop; A's deployed URL.
 - Sat 11:47 · A · Waiting on C to rebuild 4 masks (sites moved to C's suggested points in PR #9). Backend + B's frontend verified end to end. Deploy config ready.
 - Sat 11:46 · C · PR #4 (terrain masks) and PR #5 (B's frontend scaffold) merged to `main` at Lucas's request.
