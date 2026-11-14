@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getCompare, getEphemeris, getSites, USING_MOCKS } from "./api";
 import CompareTable from "./components/CompareTable";
-import Controls, { type Query } from "./components/Controls";
+import Controls, { MAX_SITES, type Query } from "./components/Controls";
 import Explain from "./components/Explain";
+import MapView from "./components/MapView";
 import Scrubber from "./components/Scrubber";
 import SiteCard from "./components/SiteCard";
 import WindowFinder from "./components/WindowFinder";
@@ -41,7 +42,10 @@ export default function App() {
         // keep only default sites that actually exist (IDs may change after the 12:00 sync)
         const ids = new Set(list.map((s) => s.id));
         const picked = DEFAULT_QUERY.sites.filter((id) => ids.has(id));
-        const q = { ...DEFAULT_QUERY, sites: picked.length ? picked : list.slice(0, 3).map((s) => s.id) };
+        const q = {
+          ...DEFAULT_QUERY,
+          sites: picked.length ? picked : list.slice(0, 3).map((s) => s.id),
+        };
         setDraft(q);
         setQuery(q);
       })
@@ -52,7 +56,12 @@ export default function App() {
     const id = ++reqId.current;
     setLoading(true);
     setError(null);
-    const range = { start: q.start, stop: q.stop, step_h: 1, horizon: q.horizon };
+    const range = {
+      start: q.start,
+      stop: q.stop,
+      step_h: 1,
+      horizon: q.horizon,
+    };
     try {
       const [c, ...es] = await Promise.all([
         getCompare(q.sites, range, toIso(q.landAt)),
@@ -81,6 +90,15 @@ export default function App() {
     const next = { ...draft, horizon: h };
     setDraft(next);
     setQuery(next);
+  };
+
+  const toggleSite = (id: string) => {
+    const on = draft.sites.includes(id);
+    if (!on && draft.sites.length >= MAX_SITES) return;
+    setDraft({
+      ...draft,
+      sites: on ? draft.sites.filter((x) => x !== id) : [...draft.sites, id],
+    });
   };
 
   /** Land at a chosen time: re-run with the same sites, dates and horizon. */
@@ -118,15 +136,18 @@ export default function App() {
       </header>
 
       <main>
-        <Controls
-          sites={sites}
-          draft={draft}
-          onDraft={setDraft}
-          onSubmit={() => setQuery(draft)}
-          onHorizon={onHorizon}
-          loading={loading}
-          dirty={dirty}
-        />
+        <div className="top-grid">
+          <Controls
+            sites={sites}
+            draft={draft}
+            onDraft={setDraft}
+            onSubmit={() => setQuery(draft)}
+            onHorizon={onHorizon}
+            loading={loading}
+            dirty={dirty}
+          />
+          <MapView sites={sites} selected={draft.sites} onToggle={toggleSite} full={draft.sites.length >= MAX_SITES} />
+        </div>
 
         {error && <p className="error panel">{error}</p>}
 
@@ -153,9 +174,9 @@ export default function App() {
                 </label>
               </div>
               <p className="muted small">
-                Sky dome: north at top, east to the right, centre = straight overhead. Shaded band = terrain blocking the
-                sky. Markers show the Sun (●) and Earth (◆) at the time on the slider (red line on the timeline; filled
-                = visible, hollow = hidden). The dotted line is the landing time. Click a timeline to jump there.
+                Sky dome: north at top, east to the right, centre = straight overhead. Shaded band = terrain blocking
+                the sky. Markers show the Sun (●) and Earth (◆) at the time on the slider (red line on the timeline;
+                filled = visible, hollow = hidden). The dotted line is the landing time. Click a timeline to jump there.
               </p>
               {times.length > 0 && cursor >= 0 && (
                 <Scrubber
