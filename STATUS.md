@@ -40,7 +40,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 - **Status:** in review
 - **Current task:** first masks for all 10 polar sites, PR open; waiting on real site coordinates
-- **Branch / PR:** `claude/project-thread-mabu61` (PR linked in team chat)
+- **Branch / PR:** `claude/project-thread-mabu61` PR #4
 - **Done so far:** 80 m/px LOLA DEM read and checked (metres, polar stereo, NaN nodata); ray-caster with curvature; masks for 10 sites in `backend/data/masks/`; direction checks pass (fake-Moon tests + two independent methods agree, see `terrain/validate.md`)
 - **Next:** rerun with A's `sites.json` (takes ~10 s), Quickmap screenshot check, optional 10 m mast masks
 - **Blocked on:** nothing
