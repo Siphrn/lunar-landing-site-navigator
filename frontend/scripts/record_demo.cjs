@@ -52,8 +52,8 @@ const phrase = (body, cell) =>
       const i = heads.findIndex((t) => t.startsWith(h));
       const out = {};
       for (const tr of document.querySelectorAll("table tbody tr")) {
-        const td = tr.querySelectorAll("td");
-        out[td[0].textContent.replace(/flat|ground/g, "").trim()] = td[i].textContent.trim();
+        const td = tr.querySelectorAll("th, td"); // site name is the row header
+        out[td[0].textContent.replace(/flat|ground/g, "").trim()] = td[i].textContent.replace("(best)", "").trim(); // drop the screen-reader-only marker
       }
       return out;
     }, header);
@@ -71,7 +71,7 @@ const phrase = (body, cell) =>
   await wait(4500);
 
   // 10–30 s: the comparison
-  await scrollTo("h2", 10);
+  await scrollTo("#compare", 10);
   await caption("Side by side: hours of sunlight for power, Earth in view for radio, and the longest night");
   await wait(5000);
   await scrollTo(".cards", 120);
@@ -89,7 +89,7 @@ const phrase = (body, cell) =>
   await wait(800);
   await page.getByRole("button", { name: "Flat horizon" }).click();
   await settle();
-  await scrollTo("h2", 10);
+  await scrollTo("#compare", 10);
   const flatBoth = await column("% Sun + Earth");
   await caption("Flat horizon: pretend the Moon is a smooth ball...");
   await wait(4000);
@@ -98,7 +98,7 @@ const phrase = (body, cell) =>
   await wait(600);
   await page.getByRole("button", { name: "Terrain horizon" }).click();
   await settle();
-  await scrollTo("h2", 10);
+  await scrollTo("#compare", 10);
   const pct = (t) => parseFloat(t);
   const site = Object.keys(terrainBoth).sort(
     (a, b) => Math.abs(pct(flatBoth[b]) - pct(terrainBoth[b])) - Math.abs(pct(flatBoth[a]) - pct(terrainBoth[a])),
@@ -112,11 +112,11 @@ const phrase = (body, cell) =>
   // so they stay true if the data changes.
   const firstRow = () =>
     page.evaluate(() => {
-      const cells = [...document.querySelectorAll("table tbody tr:first-child td")].map((td) => td.textContent.trim());
+      const cells = [...document.querySelectorAll("table tbody tr:first-child th, table tbody tr:first-child td")].map((td) => td.textContent.replace("(best)", "").trim());
       return { name: cells[0], sunset: cells[cells.length - 2], earthset: cells[cells.length - 1] };
     });
   const before = await firstRow();
-  await scrollTo("h2", 10);
+  await scrollTo("#compare", 10);
   await caption(
     `Landing at ${before.name} on Dec 15: ${phrase("the Sun", before.sunset)} and ${phrase("Earth", before.earthset)}`,
   );
@@ -131,7 +131,7 @@ const phrase = (body, cell) =>
   await wait(1200);
   await page.click("button[type=submit]");
   await settle();
-  await scrollTo("h2", 10);
+  await scrollTo("#compare", 10);
   const after = await firstRow();
   await caption(
     `Land on Dec 29 instead: ${phrase("the Sun", after.sunset)} and ${phrase("Earth", after.earthset)}`,

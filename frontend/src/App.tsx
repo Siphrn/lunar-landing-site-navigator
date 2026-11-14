@@ -4,11 +4,20 @@ import { HAS_SNAPSHOT, snapshotIndex } from "./snapshot";
 import CompareTable from "./components/CompareTable";
 import Controls, { MAX_SITES, type Query } from "./components/Controls";
 import Explain from "./components/Explain";
+import Highlights from "./components/Highlights";
 import MapView from "./components/MapView";
 import Scrubber from "./components/Scrubber";
 import SiteCard from "./components/SiteCard";
 import WindowFinder from "./components/WindowFinder";
 import type { CompareResponse, EphemerisResponse, Horizon, Site } from "./types";
+import { fmtUtc } from "./format";
+
+/** "Dec 1 – Dec 31, 2026" for the compared period (stop is exclusive). */
+function fmtRange(start: string, stop: string) {
+  const a = fmtUtc(start).split(",")[0];
+  const lastDay = new Date(Date.parse(stop) - 1);
+  return `${a} – ${fmtUtc(lastDay.toISOString()).split(",")[0]}, ${lastDay.getUTCFullYear()}`;
+}
 
 const DEFAULT_QUERY: Query = {
   // Picked from real data: a peak with great Earth view, a massif, and a rim that never sees Earth.
@@ -152,36 +161,46 @@ export default function App() {
 
   return (
     <>
-      <header className="top">
-        <div className="hero">
-          <p className="eyebrow">NASA Space Apps 2026 · Lunar south pole</p>
-          <h1>Lunar Landing Site Navigator</h1>
-          <p className="lede">
-            Compare landing sites in seconds: when is there <span className="sun-t">sunlight for power</span> and{" "}
-            <span className="earth-t">Earth in view for radio</span>?
-          </p>
-          <div className="hero-meta">
-            <button type="button" className="ghost" onClick={() => setShowHelp((v) => !v)} aria-expanded={showHelp}>
-              {showHelp ? "Hide the guide" : "New here? How to read this"}
-            </button>
+      <a className="skip" href="#compare">
+        Skip to results
+      </a>
+      <header className="appbar">
+        <div className="appbar-inner">
+          <div className="brand">
+            <svg className="logo" viewBox="0 0 32 32" aria-hidden="true">
+              <circle cx="16" cy="16" r="13" />
+              <circle cx="12" cy="13" r="2.6" />
+              <circle cx="20" cy="20" r="3.4" />
+              <circle cx="20.5" cy="11" r="1.6" />
+            </svg>
+            <div>
+              <h1>Lunar Landing Site Navigator</h1>
+              <p className="tagline">
+                <span className="t-sun">Sunlight</span> and <span className="t-earth">Earth visibility</span> at the
+                lunar south pole
+              </p>
+            </div>
+          </div>
+          <div className="appbar-meta">
             {source === "mock" && <span className="tag warn">Mock data: numbers are not real</span>}
             {source === "snapshot" && (
               <span
                 className="tag info"
-                title="Saved answers from the real API, computed in your browser. No backend needed."
+                title={`Saved answers from the real API, computed in your browser${snapRange ? ` (${snapRange.min} to ${snapRange.max})` : ""}.`}
               >
-                Offline snapshot · {snapRange ? `${snapRange.min} to ${snapRange.max}` : "real data"}
+                Offline snapshot
               </span>
             )}
             {source === "live" && <span className="tag live">Live data</span>}
+            <button type="button" className="ghost" onClick={() => setShowHelp((v) => !v)} aria-expanded={showHelp}>
+              {showHelp ? "Hide guide" : "How to read this"}
+            </button>
           </div>
         </div>
       </header>
 
-      <main>
-        {showHelp && <Explain onClose={() => setShowHelp(false)} />}
-
-        <div className="top-grid">
+      <div className="layout">
+        <aside className="sidebar">
           <Controls
             sites={sites}
             draft={draft}
@@ -193,91 +212,157 @@ export default function App() {
             dirty={dirty}
             dateLimits={source === "snapshot" ? snapRange : null}
           />
-          <MapView sites={sites} selected={draft.sites} onToggle={toggleSite} full={draft.sites.length >= MAX_SITES} />
-        </div>
+        </aside>
 
-        {error && <p className="error panel">{error}</p>}
+        <main id="main">
+          {showHelp && <Explain onClose={() => setShowHelp(false)} />}
+          {error && (
+            <p className="error panel" role="alert">
+              {error}
+            </p>
+          )}
 
-        {cmp && (
-          <>
-            <section>
-              <div className="section-head">
-                <h2>Comparison</h2>
-                <span className="section-sub">Best in each column highlighted</span>
+          <section className="overview" aria-label="Map and leaders">
+            <MapView
+              sites={sites}
+              selected={draft.sites}
+              onToggle={toggleSite}
+              full={draft.sites.length >= MAX_SITES}
+            />
+            {cmp && (
+              <div className="panel leaders">
+                <div className="panel-head">
+                  <h3>At a glance</h3>
+                  <span className="sub">
+                    {cmp.results.length} sites · {fmtRange(cmp.start, cmp.stop)}
+                  </span>
+                </div>
+                <Highlights cmp={cmp} />
+                <div className="picked">
+                  <h4>Selected sites</h4>
+                  <ul>
+                    {cmp.results.map((r) => {
+                      const site = sites.find((x) => x.id === r.site);
+                      return (
+                        <li key={r.site}>
+                          <span>{r.name}</span>
+                          {site && (
+                            <span className="coords">
+                              {Math.abs(site.lat).toFixed(2)}°{site.lat < 0 ? "S" : "N"}, {site.lon_e.toFixed(2)}°E
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               </div>
-              <CompareTable cmp={cmp} requested={query?.horizon ?? "terrain"} requestedMast={query?.mastM ?? 0} />
-            </section>
+            )}
+          </section>
 
-            <section>
-              <div className="section-head">
-                <h2>Best landing window</h2>
-                <span className="section-sub">Sun and Earth both up, for at least…</span>
-              </div>
-              <WindowFinder cmp={cmp} minHours={minHours} onMinHours={setMinHours} onLand={landAt} />
-            </section>
+          {cmp && (
+            <>
+              <section id="compare" aria-labelledby="compare-title">
+                <div className="section-head">
+                  <h2 id="compare-title" className="flow-title">
+                    <span className="step-n" aria-hidden="true">
+                      2
+                    </span>
+                    Compare
+                  </h2>
+                  <ul className="key" aria-label="Column colours">
+                    <li>
+                      <i className="dot sun" /> Sunlight (power)
+                    </li>
+                    <li>
+                      <i className="dot earth" /> Earth in view (radio)
+                    </li>
+                    <li>
+                      <i className="dot both" /> Both at once
+                    </li>
+                    <li>↑ higher is better · ↓ lower is better</li>
+                  </ul>
+                </div>
+                <CompareTable cmp={cmp} requested={query?.horizon ?? "terrain"} requestedMast={query?.mastM ?? 0} />
 
-            <section>
-              <div className="section-head">
-                <h2>Sky and timeline</h2>
-                <label className="toggle">
-                  <input type="checkbox" checked={zoom} onChange={(e) => setZoom(e.target.checked)} />
-                  Zoom to horizon
-                </label>
-              </div>
-              <ul className="legend" aria-label="Chart legend">
-                <li>
-                  <i className="sw sun" /> Sun
-                </li>
-                <li>
-                  <i className="sw earth" /> Earth
-                </li>
-                <li>
-                  <i className="sw terrain" /> Terrain
-                </li>
-                <li>
-                  <i className="sw dotted" /> Hidden
-                </li>
-                <li>
-                  <i className="sw now" /> Slider time
-                </li>
-              </ul>
-              {times.length > 0 && cursor >= 0 && (
-                <Scrubber
-                  times={times}
-                  index={Math.min(cursor, times.length - 1)}
-                  onIndex={setCursor}
-                  playing={playing}
-                  onPlaying={setPlaying}
-                  speed={speed}
-                  onSpeed={setSpeed}
-                  landIndex={cmp.land_at ? times.indexOf(cmp.land_at) : -1}
-                  stepH={cmp.step_h}
-                />
-              )}
-              <div className={`cards ${loading ? "stale" : ""}`}>
-                {cmp.results.map((m) => (
-                  <SiteCard
-                    key={m.site}
-                    metrics={m}
-                    eph={ephs[m.site]}
-                    requested={query?.horizon ?? "terrain"}
-                    requestedMast={query?.mastM ?? 0}
-                    landAt={landAtIso}
-                    cursor={cursorIso}
-                    onPick={pickTime}
-                    zoom={zoom}
+                <div className="subsection">
+                  <h3>Best landing window</h3>
+                  <p className="sub">First stretch with the Sun and Earth both up, for at least…</p>
+                  <WindowFinder cmp={cmp} minHours={minHours} onMinHours={setMinHours} onLand={landAt} />
+                </div>
+              </section>
+
+              <section id="explore" aria-labelledby="explore-title">
+                <div className="section-head">
+                  <h2 id="explore-title" className="flow-title">
+                    <span className="step-n" aria-hidden="true">
+                      3
+                    </span>
+                    Explore timelines
+                  </h2>
+                  <label className="toggle">
+                    <input type="checkbox" checked={zoom} onChange={(e) => setZoom(e.target.checked)} />
+                    Zoom to horizon
+                  </label>
+                </div>
+                <ul className="legend" aria-label="Chart legend">
+                  <li>
+                    <i className="sw sun" /> Sun
+                  </li>
+                  <li>
+                    <i className="sw earth" /> Earth
+                  </li>
+                  <li>
+                    <i className="sw both" /> Both up
+                  </li>
+                  <li>
+                    <i className="sw terrain" /> Terrain
+                  </li>
+                  <li>
+                    <i className="sw dotted" /> Hidden
+                  </li>
+                  <li>
+                    <i className="sw now" /> Slider time
+                  </li>
+                </ul>
+                {times.length > 0 && cursor >= 0 && (
+                  <Scrubber
+                    times={times}
+                    index={Math.min(cursor, times.length - 1)}
+                    onIndex={setCursor}
+                    playing={playing}
+                    onPlaying={setPlaying}
+                    speed={speed}
+                    onSpeed={setSpeed}
+                    landIndex={cmp.land_at ? times.indexOf(cmp.land_at) : -1}
+                    stepH={cmp.step_h}
                   />
-                ))}
-              </div>
-            </section>
-          </>
-        )}
-      </main>
+                )}
+                <div className={`cards ${loading ? "stale" : ""}`} aria-busy={loading}>
+                  {cmp.results.map((m) => (
+                    <SiteCard
+                      key={m.site}
+                      metrics={m}
+                      eph={ephs[m.site]}
+                      requested={query?.horizon ?? "terrain"}
+                      requestedMast={query?.mastM ?? 0}
+                      landAt={landAtIso}
+                      cursor={cursorIso}
+                      onPick={pickTime}
+                      zoom={zoom}
+                    />
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
+        </main>
+      </div>
 
       <footer>
         <span>Sun and Earth positions: NASA/JPL Horizons</span>
         <span>Terrain: LRO LOLA elevation models, NASA PGDA</span>
-        <span>Built for the NASA Space Apps Challenge 2026</span>
+        <span>NASA Space Apps Challenge 2026</span>
       </footer>
     </>
   );

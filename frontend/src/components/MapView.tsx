@@ -144,9 +144,9 @@ export default function MapView({ sites, selected, onToggle, full }: Props) {
   const h = HALF_KM * 1000;
   return (
     <div className="panel map">
-      <div className="map-head">
-        <b>Map of the south pole</b>
-        <span className="muted small">Tap a site to add or remove it · Earth-facing side at top</span>
+      <div className="panel-head">
+        <h3>South-pole map</h3>
+        <span className="sub">Tap a site to add or remove it · Earth-facing side at top</span>
       </div>
       <Plot
         data={data}
