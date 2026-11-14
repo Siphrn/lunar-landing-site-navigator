@@ -23,7 +23,17 @@ const SPEEDS = [
 const FRAME_MS = 80;
 
 /** Time slider + play/pause shared by every site card. */
-export default function Scrubber({ times, index, onIndex, playing, onPlaying, speed, onSpeed, landIndex, stepH }: Props) {
+export default function Scrubber({
+  times,
+  index,
+  onIndex,
+  playing,
+  onPlaying,
+  speed,
+  onSpeed,
+  landIndex,
+  stepH,
+}: Props) {
   const last = times.length - 1;
   // Keep the latest index in a ref so the interval doesn't restart every frame.
   const idx = useRef(index);

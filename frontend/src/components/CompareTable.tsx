@@ -1,7 +1,15 @@
 import { bestValues, METRIC_COLUMNS, untilSet } from "../format";
 import type { CompareResponse, Horizon } from "../types";
 
-export default function CompareTable({ cmp, requested }: { cmp: CompareResponse; requested: Horizon }) {
+export default function CompareTable({
+  cmp,
+  requested,
+  requestedMast,
+}: {
+  cmp: CompareResponse;
+  requested: Horizon;
+  requestedMast: number;
+}) {
   const best = bestValues(cmp.results);
   return (
     <div className="table-wrap panel">
@@ -29,6 +37,14 @@ export default function CompareTable({ cmp, requested }: { cmp: CompareResponse;
                     flat
                   </span>
                 )}
+                {requested === "terrain" &&
+                  r.horizon === "terrain" &&
+                  requestedMast > 0 &&
+                  r.mast_m !== requestedMast && (
+                    <span className="tag warn" title={`No ${requestedMast} m mast mask for this site`}>
+                      ground
+                    </span>
+                  )}
               </td>
               {METRIC_COLUMNS.map((c) => (
                 <td key={c.key} className={best[c.key] === r[c.key] ? "best" : ""}>

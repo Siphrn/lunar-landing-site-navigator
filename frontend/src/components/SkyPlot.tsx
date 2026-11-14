@@ -40,7 +40,11 @@ interface Props {
 export default function SkyPlot({ eph, markIndex, zoom }: Props) {
   // Everything except the moving markers: rebuilt only when the data or zoom changes,
   // so scrubbing/animating stays cheap.
-  const { data: base, inner, outer } = useMemo(() => {
+  const {
+    data: base,
+    inner,
+    outer,
+  } = useMemo(() => {
     const lowest = Math.min(...eph.sun.el, ...eph.earth.el, ...(eph.mask_deg ?? [0]));
     const outer = 90 + Math.max(5, Math.ceil(-lowest)); // show a little below the flat horizon
     const inner = zoom ? 70 : 0;

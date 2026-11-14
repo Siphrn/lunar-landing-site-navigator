@@ -7,6 +7,7 @@ interface Props {
   metrics: SiteMetrics;
   eph: EphemerisResponse | undefined;
   requested: Horizon;
+  requestedMast: number;
   landAt: string | null;
   /** Scrubber time (ISO) shared by all cards. */
   cursor: string | null;
@@ -17,17 +18,26 @@ interface Props {
 function Now({ label, el, az, up }: { label: string; el: number; az: number; up: boolean }) {
   return (
     <span className={`now-item ${up ? "up" : "down"}`}>
-      {label} <b>{up ? "visible" : "hidden"}</b> <span className="muted">
+      {label} <b>{up ? "visible" : "hidden"}</b>{" "}
+      <span className="muted">
         {el.toFixed(1)}° up, az {az.toFixed(0)}°
       </span>
     </span>
   );
 }
 
-export default function SiteCard({ metrics: m, eph, requested, landAt, cursor, onPick, zoom }: Props) {
+export default function SiteCard({ metrics: m, eph, requested, requestedMast, landAt, cursor, onPick, zoom }: Props) {
   const landIndex = eph && landAt ? eph.times.indexOf(landAt) : -1;
   const markIndex = eph && cursor ? eph.times.indexOf(cursor) : landIndex;
   const fellBack = requested === "terrain" && m.horizon === "flat";
+  const mastFellBack = !fellBack && requested === "terrain" && requestedMast > 0 && m.mast_m !== requestedMast;
+  const label = fellBack
+    ? "flat horizon (terrain not available)"
+    : mastFellBack
+      ? `terrain horizon · ground level (no ${requestedMast} m mast data)`
+      : m.horizon === "terrain" && m.mast_m > 0
+        ? `terrain horizon · ${m.mast_m} m mast`
+        : `${m.horizon} horizon`;
   const best = m.both_windows.reduce<(typeof m.both_windows)[number] | null>(
     (a, w) => (!a || w.hours > a.hours ? w : a),
     null,
@@ -36,9 +46,7 @@ export default function SiteCard({ metrics: m, eph, requested, landAt, cursor, o
     <article className="card panel">
       <header>
         <h3>{m.name}</h3>
-        <span className={`tag ${fellBack ? "warn" : ""}`}>
-          {fellBack ? "flat horizon (terrain not available)" : `${m.horizon} horizon`}
-        </span>
+        <span className={`tag ${fellBack || mastFellBack ? "warn" : ""}`}>{label}</span>
       </header>
 
       <div className="stats">

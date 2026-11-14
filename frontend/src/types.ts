@@ -31,6 +31,8 @@ export interface EphemerisResponse {
   step_h: number;
   /** "flat" if terrain was asked for but no mask exists (API fell back). */
   horizon: Horizon;
+  /** Mast height actually used (0 for flat, or when no mask exists for the asked height). */
+  mast_m: number;
   times: IsoTime[];
   sun: BodyTrack;
   earth: BodyTrack;
@@ -49,6 +51,7 @@ export interface SiteMetrics {
   site: string;
   name: string;
   horizon: Horizon;
+  mast_m: number;
   pct_sunlit: number;
   longest_dark_h: number;
   pct_earth: number;
@@ -77,4 +80,6 @@ export interface RangeQuery {
   stop: string;
   step_h?: number;
   horizon?: Horizon;
+  /** Optional mast height in metres (C ships 0 and 10); only used with the terrain horizon. */
+  mast_m?: number;
 }

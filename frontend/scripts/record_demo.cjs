@@ -73,14 +73,14 @@ const phrase = (body, cell) =>
   // 30–45 s: flat vs terrain
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
   await wait(800);
-  await page.click("text=Flat horizon");
+  await page.getByRole("button", { name: "Flat horizon" }).click();
   await settle();
   await scrollTo("h2", 10);
   await caption("Flat horizon: pretend the Moon is a smooth ball...");
   await wait(4000);
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
   await wait(600);
-  await page.click("text=Terrain horizon");
+  await page.getByRole("button", { name: "Terrain horizon" }).click();
   await settle();
   await scrollTo("h2", 10);
   await caption("...vs real LOLA terrain. Sunlight drops, and a peak can even see Earth more");

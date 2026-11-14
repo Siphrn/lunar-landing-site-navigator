@@ -9,6 +9,8 @@ interface Body {
   /** "1"/"0" per hour: visible with the flat horizon / with the terrain mask */
   vis_flat: string;
   vis_terrain: string;
+  /** same with the 10 m mast mask (absent if there is none) */
+  vis_terrain_h10?: string;
 }
 export interface SnapshotSite {
   site: string;
@@ -17,6 +19,8 @@ export interface SnapshotSite {
   /** horizon the API actually used when asked for terrain ("flat" if no mask) */
   terrain_horizon: Horizon;
   mask_deg: number[] | null;
+  /** 10 m mast mask, or null if the API fell back to the ground mask */
+  mask_deg_h10: number[] | null;
   sun: Body;
   earth: Body;
 }
@@ -86,8 +90,10 @@ export async function snapEphemeris(siteId: string, q: RangeQuery): Promise<Ephe
   const idx: number[] = [];
   for (let i = i0; i < i1 && i < s.n; i += step) idx.push(i);
   const horizon: Horizon = q.horizon === "terrain" ? s.terrain_horizon : "flat";
+  // Same rules as the API: only 0 and 10 m exist; anything else, or no 10 m mask, falls back to 0.
+  const mast = horizon === "terrain" && q.mast_m === 10 && s.mask_deg_h10 ? 10 : 0;
   const body = (bd: Body) => {
-    const vis = horizon === "terrain" ? bd.vis_terrain : bd.vis_flat;
+    const vis = horizon === "flat" ? bd.vis_flat : mast === 10 ? bd.vis_terrain_h10! : bd.vis_terrain;
     return { az: idx.map((i) => bd.az[i]), el: idx.map((i) => bd.el[i]), visible: idx.map((i) => vis[i] === "1") };
   };
   return {
@@ -96,10 +102,11 @@ export async function snapEphemeris(siteId: string, q: RangeQuery): Promise<Ephe
     stop: iso(b),
     step_h: step,
     horizon,
+    mast_m: mast,
     times: idx.map((i) => iso(t0 + i * HOUR)),
     sun: body(s.sun),
     earth: body(s.earth),
-    mask_deg: horizon === "terrain" ? s.mask_deg : null,
+    mask_deg: horizon === "flat" ? null : mast === 10 ? s.mask_deg_h10 : s.mask_deg,
   };
 }
 
@@ -121,7 +128,7 @@ export async function snapCompare(siteIds: string[], q: RangeQuery, landAt?: str
       if (i < 0) i = e.times.length - 1;
     }
     const m = summarize(e.times, e.sun.el, e.sun.visible, e.earth.visible, step, i);
-    results.push({ site: id, name: names.get(id) ?? id, horizon: e.horizon, ...m });
+    results.push({ site: id, name: names.get(id) ?? id, horizon: e.horizon, mast_m: e.mast_m, ...m });
   }
   return { start: iso(a), stop: iso(b), step_h: step, land_at: landIso, results };
 }

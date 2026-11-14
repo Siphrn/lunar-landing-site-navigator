@@ -7,6 +7,8 @@ import { pyRound } from "./metrics";
 import type { Horizon } from "./types";
 
 const API = process.env.API_URL;
+/** Compare as JSON, the way the app receives it (JSON can't tell -0 from 0). */
+const json = (x: unknown) => JSON.parse(JSON.stringify(x));
 
 describe("pyRound matches Python round()", () => {
   it.each([
@@ -29,26 +31,27 @@ describe.skipIf(!API)("snapshot matches the live API", () => {
   const rnd = () => (seed = (seed * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
   const day = (d: number) => new Date(Date.UTC(2026, 10, 17 + d)).toISOString().slice(0, 10);
 
-  it("ephemeris and compare agree for 40 random queries", async () => {
+  it("ephemeris and compare agree for 60 random queries", async () => {
     const ids = (await snapshotSites()).map((s) => s.id);
-    for (let k = 0; k < 40; k++) {
+    for (let k = 0; k < 60; k++) {
       const d0 = Math.floor(rnd() * 50);
       const d1 = d0 + 1 + Math.floor(rnd() * (58 - d0 - 1));
       const step = [1, 1, 2, 3, 6][Math.floor(rnd() * 5)];
       const horizon: Horizon = rnd() < 0.5 ? "flat" : "terrain";
+      const mast = [0, 10, 10, 5][Math.floor(rnd() * 4)]; // 5 m has no masks: must fall back to 0
       const pick = ids.filter(() => rnd() < 0.35).slice(0, 4);
       if (!pick.length) pick.push(ids[k % ids.length]);
-      const q = { start: day(d0), stop: day(d1), step_h: step, horizon };
+      const q = { start: day(d0), stop: day(d1), step_h: step, horizon, mast_m: mast };
       const landH = Math.floor(rnd() * (d1 - d0) * 24);
       const land = new Date(Date.parse(day(d0)) + landH * 3600_000).toISOString().replace(".000Z", "Z");
-      const qs = `start=${q.start}&stop=${q.stop}&step_h=${step}&horizon=${horizon}`;
+      const qs = `start=${q.start}&stop=${q.stop}&step_h=${step}&horizon=${horizon}&mast_m=${mast}`;
 
       const live = await get(`/compare?sites=${pick.join(",")}&${qs}&land_at=${land}`);
       const snap = await snapCompare(pick, q, land);
-      expect(snap, `compare ${pick} ${qs} land_at=${land}`).toEqual(live);
+      expect(json(snap), `compare ${pick} ${qs} land_at=${land}`).toEqual(json(live));
 
       const eLive = await get(`/ephemeris?site=${pick[0]}&${qs}`);
-      expect(await snapEphemeris(pick[0], q), `ephemeris ${pick[0]} ${qs}`).toEqual(eLive);
+      expect(json(await snapEphemeris(pick[0], q)), `ephemeris ${pick[0]} ${qs}`).toEqual(json(eLive));
     }
   }, 60_000);
 });

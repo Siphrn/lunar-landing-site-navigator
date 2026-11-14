@@ -8,7 +8,6 @@ interface Props {
   onLand: (iso: string) => void;
 }
 
-
 const PRESETS = [24, 72, 168];
 
 export default function WindowFinder({ cmp, minHours, onMinHours, onLand }: Props) {

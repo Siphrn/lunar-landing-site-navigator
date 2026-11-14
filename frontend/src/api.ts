@@ -73,12 +73,20 @@ export function getEphemeris(site: string, q: RangeQuery): Promise<EphemerisResp
   const qq = { ...q, horizon, step_h: q.step_h ?? 1 };
   if (BASE)
     return liveOrSnapshot(
-      () => get<EphemerisResponse>("/ephemeris", { site, start: q.start, stop: q.stop, step_h: qq.step_h, horizon }),
+      () =>
+        get<EphemerisResponse>("/ephemeris", {
+          site,
+          start: q.start,
+          stop: q.stop,
+          step_h: qq.step_h,
+          horizon,
+          mast_m: q.mast_m || undefined,
+        }),
       () => snapEphemeris(site, qq),
       qq,
     );
   if (HAS_SNAPSHOT) return snapEphemeris(site, qq);
-  return mock<EphemerisResponse>(`ephemeris_${site}_${horizon}`);
+  return mock<EphemerisResponse>(`ephemeris_${site}_${horizon}`); // mocks ignore mast_m
 }
 
 /** Contract 5. landAt is optional ISO UTC. */
@@ -94,6 +102,7 @@ export async function getCompare(sites: string[], q: RangeQuery, landAt?: string
           stop: q.stop,
           step_h: qq.step_h,
           horizon,
+          mast_m: q.mast_m || undefined,
           land_at: landAt,
         }),
       () => snapCompare(sites, qq, landAt),

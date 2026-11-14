@@ -184,6 +184,7 @@ export default function MapView({ sites, selected, onToggle, full }: Props) {
                   sizey: basemap.y_max_m - basemap.y_min_m,
                   sizing: "stretch",
                   layer: "below",
+                  opacity: 0.65, // keep site labels readable on top of the relief
                 },
               ]
             : [],

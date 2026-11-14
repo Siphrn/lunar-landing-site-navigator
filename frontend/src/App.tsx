@@ -17,6 +17,7 @@ const DEFAULT_QUERY: Query = {
   stop: "2026-12-31",
   landAt: "2026-12-15T12:00",
   horizon: "terrain",
+  mastM: 0,
 };
 
 const toIso = (local: string) => (local ? `${local.length === 16 ? local + ":00" : local}Z` : undefined);
@@ -76,6 +77,7 @@ export default function App() {
       stop: q.stop,
       step_h: 1,
       horizon: q.horizon,
+      mast_m: q.mastM,
     };
     try {
       const [c, ...es] = await Promise.all([
@@ -104,6 +106,12 @@ export default function App() {
   const onHorizon = (h: Horizon) => {
     // Horizon toggles apply immediately: it's the key demo moment.
     const next = { ...draft, horizon: h };
+    setDraft(next);
+    setQuery(next);
+  };
+
+  const onMast = (m: number) => {
+    const next = { ...draft, mastM: m };
     setDraft(next);
     setQuery(next);
   };
@@ -167,6 +175,7 @@ export default function App() {
             onDraft={setDraft}
             onSubmit={() => setQuery(draft)}
             onHorizon={onHorizon}
+            onMast={onMast}
             loading={loading}
             dirty={dirty}
             dateLimits={source === "snapshot" ? snapRange : null}
@@ -182,7 +191,7 @@ export default function App() {
           <>
             <section>
               <h2>Comparison</h2>
-              <CompareTable cmp={cmp} requested={query?.horizon ?? "terrain"} />
+              <CompareTable cmp={cmp} requested={query?.horizon ?? "terrain"} requestedMast={query?.mastM ?? 0} />
             </section>
 
             <section>
@@ -223,6 +232,7 @@ export default function App() {
                     metrics={m}
                     eph={ephs[m.site]}
                     requested={query?.horizon ?? "terrain"}
+                    requestedMast={query?.mastM ?? 0}
                     landAt={landAtIso}
                     cursor={cursorIso}
                     onPick={pickTime}

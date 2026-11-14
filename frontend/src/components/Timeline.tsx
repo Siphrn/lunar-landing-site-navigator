@@ -15,7 +15,11 @@ interface Props {
 export default function Timeline({ eph, landAt, cursor, onPick }: Props) {
   const both = eph.sun.visible.map((v, i) => v && eph.earth.visible[i]);
   // z codes: 0 off, 1 sun, 2 earth, 3 both. Rows are drawn bottom-up, so list "Both" first.
-  const z = [both.map((v) => (v ? 3 : 0)), eph.earth.visible.map((v) => (v ? 2 : 0)), eph.sun.visible.map((v) => (v ? 1 : 0))];
+  const z = [
+    both.map((v) => (v ? 3 : 0)),
+    eph.earth.visible.map((v) => (v ? 2 : 0)),
+    eph.sun.visible.map((v) => (v ? 1 : 0)),
+  ];
   const step = (c: string, a: number, b: number): [number, string][] => [
     [a, c],
     [b, c],
@@ -82,7 +86,8 @@ export default function Timeline({ eph, landAt, cursor, onPick }: Props) {
       }}
       onClick={(e) => {
         const x = e.points[0]?.x;
-        if (onPick && typeof x === "string") onPick(new Date(x.replace(" ", "T") + (x.endsWith("Z") ? "" : "Z")).toISOString().replace(".000Z", "Z"));
+        if (onPick && typeof x === "string")
+          onPick(new Date(x.replace(" ", "T") + (x.endsWith("Z") ? "" : "Z")).toISOString().replace(".000Z", "Z"));
       }}
       useResizeHandler
       style={{ width: "100%", cursor: onPick ? "pointer" : undefined }}

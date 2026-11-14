@@ -60,7 +60,7 @@ export function summarize(
   earthVis: boolean[],
   stepH: number,
   startIndex: number,
-): Omit<SiteMetrics, "site" | "name" | "horizon"> {
+): Omit<SiteMetrics, "site" | "name" | "horizon" | "mast_m"> {
   const both = sunVis.map((v, i) => v && earthVis[i]);
   const lit = sunEl.filter((_, i) => sunVis[i]);
   return {
