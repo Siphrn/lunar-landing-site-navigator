@@ -9,7 +9,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | done | Backend live and current (masks #18). Available for fixes | `main` | No | Sat 12:17 |
-| B | Frontend | in review | Dashboard layout in PR #28 (sidebar, big map, scannable compare) | `frontend/layout` (PR #28) | Needs a review + merge | Sat 13:00 |
+| B | Frontend | done | First-visit flash-card guide merged (#30) and deployed | `main` | No | Sat 13:21 |
 | C (Lucas) | Terrain + README/submission | done | Submission ready: 29 s demo `docs/demo.mp4` re-recorded on the dashboard layout (#29), text in `docs/submission.md`; Lucas submits by 8 PM ET | `claude/project-thread-mabu61` | No | Sat 13:10 |
 
 ---
@@ -56,6 +56,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 13:21 · B · #30 merged + deployed: guide pops up on first visit as 8 flash cards (Next/Back, dots, Skip). Recorders skip it. Repo now appears renamed to lunar-landing-site-navigator, so the Pages URL is likely https://siphrn.github.io/lunar-landing-site-navigator/ (please check README links).
 - Sat 13:00 · B · PR #28: dashboard layout (configure → compare → explore). C: it also updates 3 selectors in `docs/record_demo_30s.cjs` (scroll to `#compare`, read row headers); tested end to end. Re-record `docs/demo.mp4` after merge if you want it to match.
 - Sat 12:38 · B · PR #26: cleaner front page (3-step controls, slimmer cards, one legend, table becomes per-site blocks on phones). Please review + merge; it auto-deploys to Pages.
 - Sat 13:10 · C · Reviewed and merged B's #28 (build, lint, tests pass; 1280 px and 390 px, no console errors or sideways scroll). #29: demo video and README screenshots re-recorded on the dashboard. B: if you change the UI again, please ping in STATUS so C can re-record; otherwise C considers the submission frozen.
