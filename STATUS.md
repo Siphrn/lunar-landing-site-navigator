@@ -9,7 +9,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | done | Backend live and current (masks #18). Available for fixes | `main` | No | Sat 12:17 |
-| B | Frontend | done | Frontend merged (#11). Waiting on Pages to go live, then a live check | `main`; PR #20 (1 file) | Waiting: Pages setting + workflow re-run | Sat 12:14 |
+| B | Frontend | done | Site live: https://siphrn.github.io/nasaSpaceAppChallenge/ ; demo video recorded | `main` | No | Sat 12:18 |
 | C (Lucas) | Terrain horizon masks | working | All masks current (#18); Quickmap checks done (#19); next: final README + submission at 6:00 | `claude/project-thread-mabu61` | No | Sat 12:10 |
 
 ---
@@ -30,18 +30,14 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 ## B: frontend
 
-- **Status:** done (merged in #11). Waiting on the Pages deploy, then a live check
-- **Current task:** waiting for Pages to be switched on and the "Frontend to GitHub Pages" workflow re-run
-- **Branch / PR:** #11 merged. [PR #20](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/20): one-file fix to the demo recorder's flat-vs-terrain caption (needs a quick look + merge; merging it also re-runs the Pages workflow)
-- **Done so far:** every MVP + stretch feature, mast switch, offline snapshot (refreshed after #17/#18; 60/60 random queries match the API), Pages workflow pointed at A's backend (`https://lunar-site-navigator-api.onrender.com`), **6 s cold-start fallback** (if Render is asleep, the page answers from the snapshot instead of hanging, and switches back to live when it wakes), final demo video recorded with the final data
-- **Pages run #1 (17:12 UTC):** build + tests passed; only the deploy step failed with "Ensure GitHub Pages has been enabled". It ran before the setting was on, so nothing needs fixing in code.
-- **Next:** once the site is live, check it on desktop + phone; re-record the demo against the live URL if wanted
-- **Blocked on:** the Pages setting (Lucas) + a re-run (C, or merge PR #20)
-- **Needs from others:**
-  - **Lucas: Settings → Pages → Build and deployment → Source: "GitHub Actions"**, then **Actions → "Frontend to GitHub Pages" → Re-run all jobs** (or merge PR #20, which triggers it). Site: `https://siphrn.github.io/nasaSpaceAppChallenge/`
-  - **Everyone:** my environment can't reach onrender.com or github.io, so please open the live site once on a phone and tell B if anything looks wrong
-  - **C (README/submission):** demo facts that are true in the final data: landing at Mons Mouton on Dec 15 gives ~15 days of sun and Earth never sets; landing on Dec 29 instead, the Sun sets ~32 h after landing. Flat → terrain: at Nobile Rim 1 the time with both Sun and Earth up goes from 57.5% to 9.2%, while high ground like Malapert Massif gets *more* sun (62% → 100%). Month-long % barely change with a two-week shift (any 30-day window covers a full lunar day)
-- **Updated:** Sat 12:14 ET
+- **Status:** done
+- **Live site:** **<https://siphrn.github.io/nasaSpaceAppChallenge/>** (Pages run #3: tests, build and deploy all passed). It calls A's backend and falls back to the built-in snapshot if Render is asleep
+- **Branch / PR:** #5, #11 and #20 merged. Nothing open
+- **Done:** every MVP + stretch feature, mast switch, offline snapshot (matches the API), Pages deploy, demo video (about 69 s, captions checked against the data; B has the file)
+- **Next:** on call for fixes until the 6:00 feature freeze. If sites or masks change again: `cd frontend && npm run snapshot` (with the backend running) and push
+- **Blocked on:** nothing
+- **Needs from others:** everyone: open the live link once on a phone and tell B if anything looks off. C: tell B where the demo video should go for the submission
+- **Updated:** Sat 12:18 ET
 
 ## C: terrain horizon masks (Lucas)
 
@@ -60,6 +56,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:18 · B · Frontend live at https://siphrn.github.io/nasaSpaceAppChallenge/ (Pages run #3 green). Lane B done.
 - Sat 12:17 · A · Redeployed backend with #17/#18 (Render doesn't redeploy on push; docs fixed in #21). Terrain gate passes on the live URL. Lane A done.
 - Sat 12:14 · B · Frontend merged (#11). Pages run #1: build OK, deploy failed only because Pages wasn't on yet; needs a re-run. Snapshot refreshed for #17/#18; cold-start fallback added; PR #20 (demo caption).
 - Sat 12:13 · C · Merged B's PR #11 at Lucas's request. Lucas is turning on Settings → Pages → Source: GitHub Actions; C re-runs the Pages workflow after. Haworth + malapert_massif masks are rebuilt (#18), so B can refresh the snapshot.
