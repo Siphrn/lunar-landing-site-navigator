@@ -29,3 +29,34 @@ python terrain/suggest_sites.py de_gerlache_rim_2
 python terrain/suggest_sites.py nobile_rim_1 --radius-km 10 --step-km 0.5
 python terrain/suggest_sites.py haworth --radius-km 30 --step-km 1.5
 ```
+
+## Second round (Sat 12:00 ET): Malapert
+
+| Site | Current point | Problem | Suggested point (lat, lon_e) | Moved | Mean / max horizon | Slope |
+| --- | --- | --- | --- | --- | --- | --- |
+| malapert_massif | −86.00, 2.90 | In a ~300 m summit crater: mean horizon 5.0°, Sun 26%, Earth 43% | −86.0187, 2.2013 | 1.6 km | −0.79° / 3.67° | 2.3° |
+
+Smaller optional nudges (near-field bumps only, less impact):
+mons_mouton → −85.2826, 32.0576 (1.4 km, mean 1.61° → −0.62°);
+peak_near_cabeus_b → −83.5753, 291.5338 (1.5 km, mean 0.60° → −1.55°).
+
+## Third round (Sat 12:05 ET): Haworth must sit inside the official region
+
+Lucas pulled the official **Haworth** candidate-region outline from Quickmap
+(layer "A3: Candidate landing regions 2022", screenshot
+`img/quickmap_haworth_region.png`, vertices in `regions.json`). The region is a
+~887 km² strip on the plateau west of Haworth crater, roughly 86.1–87.4°S,
+325–348°E. **The current point (−87.9994, 337.4768) is outside it**, about 60 km
+south of the region's edge.
+
+`python terrain/best_in_region.py haworth` tried 313 points 1 km apart inside the
+outline (slope under 8°) and ranked them by average horizon:
+
+| Rank | Point (lat, lon_e) | Mean / max horizon | Slope |
+| --- | --- | --- | --- |
+| 1 | **−86.9737, 335.6129** | −0.02° / 2.95° | 4.5° |
+| 2 | −87.0473, 335.6672 | 0.00° / 3.68° | 4.5° |
+| 3 | −86.3815, 336.4244 | 0.29° / 6.54° | 7.9° |
+
+Suggested: move `haworth` to −86.9737, 335.6129. Its Horizons cache needs a
+refetch (the site moves ~115 km, so Sun/Earth angles change by up to ~1°).
