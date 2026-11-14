@@ -20,6 +20,12 @@ const phrase = (body, cell) =>
   fs.mkdirSync(OUT, { recursive: true });
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: W, height: H }, recordVideo: { dir: OUT, size: { width: W, height: H } } });
+  // Skip the first-visit guide: mark it as already seen before the page loads.
+  await ctx.addInitScript(() => {
+    try {
+      localStorage.setItem("llsn.guideSeen", "1");
+    } catch {}
+  });
   const page = await ctx.newPage();
 
   const caption = (text) =>

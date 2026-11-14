@@ -3,7 +3,8 @@ import { dataSource, getCompare, getEphemeris, getSites, type DataSource } from 
 import { HAS_SNAPSHOT, snapshotIndex } from "./snapshot";
 import CompareTable from "./components/CompareTable";
 import Controls, { MAX_SITES, type Query } from "./components/Controls";
-import Explain from "./components/Explain";
+import Guide from "./components/Guide";
+import { guideSeen } from "./guideState";
 import Highlights from "./components/Highlights";
 import MapView from "./components/MapView";
 import Scrubber from "./components/Scrubber";
@@ -40,7 +41,11 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [zoom, setZoom] = useState(true);
-  const [showHelp, setShowHelp] = useState(false);
+  // The guide opens by itself on someone's first visit. ?guide=1 forces it, ?guide=0 hides it (recordings).
+  const [showHelp, setShowHelp] = useState(() => {
+    const flag = new URLSearchParams(window.location.search).get("guide");
+    return flag === "1" || (flag !== "0" && !guideSeen());
+  });
   const [minHours, setMinHours] = useState(72);
   const [cursor, setCursor] = useState(-1); // index into the shared time axis
   const [playing, setPlaying] = useState(false);
@@ -192,8 +197,8 @@ export default function App() {
               </span>
             )}
             {source === "live" && <span className="tag live">Live data</span>}
-            <button type="button" className="ghost" onClick={() => setShowHelp((v) => !v)} aria-expanded={showHelp}>
-              {showHelp ? "Hide guide" : "How to read this"}
+            <button type="button" className="ghost" onClick={() => setShowHelp(true)} aria-haspopup="dialog">
+              How to read this
             </button>
           </div>
         </div>
@@ -215,7 +220,6 @@ export default function App() {
         </aside>
 
         <main id="main">
-          {showHelp && <Explain onClose={() => setShowHelp(false)} />}
           {error && (
             <p className="error panel" role="alert">
               {error}
@@ -358,6 +362,8 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {showHelp && <Guide onClose={() => setShowHelp(false)} />}
 
       <footer>
         <span>Sun and Earth positions: NASA/JPL Horizons</span>
