@@ -45,6 +45,18 @@ const phrase = (body, cell) =>
       },
       [sel, offset],
     );
+  /** {site name: cell text} for the comparison-table column whose header starts with `header`. */
+  const column = (header) =>
+    page.evaluate((h) => {
+      const heads = [...document.querySelectorAll("table thead th")].map((th) => th.textContent.trim());
+      const i = heads.findIndex((t) => t.startsWith(h));
+      const out = {};
+      for (const tr of document.querySelectorAll("table tbody tr")) {
+        const td = tr.querySelectorAll("td");
+        out[td[0].textContent.replace(/flat|ground/g, "").trim()] = td[i].textContent.trim();
+      }
+      return out;
+    }, header);
   const settle = () => page.waitForSelector(".cards:not(.stale)").then(() => wait(600));
 
   await page.goto(URL_);
@@ -69,21 +81,31 @@ const phrase = (body, cell) =>
   await caption("Play the month: the Sun ducks behind crater rims; Earth (blue) hides at some sites");
   await wait(6000);
   await page.click(".play");
+  await caption("");
 
-  // 30–45 s: flat vs terrain
+  // 30–45 s: flat vs terrain (captions quote the biggest change, read off the page)
+  const terrainBoth = await column("% Sun + Earth");
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
   await wait(800);
   await page.getByRole("button", { name: "Flat horizon" }).click();
   await settle();
   await scrollTo("h2", 10);
+  const flatBoth = await column("% Sun + Earth");
   await caption("Flat horizon: pretend the Moon is a smooth ball...");
   await wait(4000);
+  await caption("");
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
   await wait(600);
   await page.getByRole("button", { name: "Terrain horizon" }).click();
   await settle();
   await scrollTo("h2", 10);
-  await caption("...vs real LOLA terrain. Sunlight drops, and a peak can even see Earth more");
+  const pct = (t) => parseFloat(t);
+  const site = Object.keys(terrainBoth).sort(
+    (a, b) => Math.abs(pct(flatBoth[b]) - pct(terrainBoth[b])) - Math.abs(pct(flatBoth[a]) - pct(terrainBoth[a])),
+  )[0];
+  await caption(
+    `...vs real LOLA terrain: at ${site}, time with both Sun and Earth up goes from ${flatBoth[site]} to ${terrainBoth[site]}`,
+  );
   await wait(5000);
 
   // 45–60 s: shift the dates by two weeks. Captions read the real numbers off the page,
@@ -99,6 +121,7 @@ const phrase = (body, cell) =>
     `Landing at ${before.name} on Dec 15: ${phrase("the Sun", before.sunset)} and ${phrase("Earth", before.earthset)}`,
   );
   await wait(5000);
+  await caption("");
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
   await wait(600);
   await caption("Now slip the launch two weeks...");
