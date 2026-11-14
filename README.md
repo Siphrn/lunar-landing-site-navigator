@@ -444,6 +444,36 @@ Conventions for all of them: times are UTC ISO-8601 strings (`"2026-12-01T00:00:
 - [ ] The app works deployed, at phone width, with credits in the footer.
 - [ ] The demo video is recorded (under 2 minutes) and linked on the project page.
 
+## Workflow (Saturday, Nov 14)
+
+Who is who: **Lucas is Person C** (terrain). Person A has started on the backend. Person B starts soon. All times are Eastern (ET). This is the clock-time version of the hour-by-hour plan above; where the two differ, follow this one.
+
+### Git rules (everyone)
+
+- Each person works on their own branches: `backend/*` for A, `frontend/*` for B, `terrain/*` for C (e.g. `terrain/ray-cast`).
+- Stay in your own folder so nobody edits the same file: `backend/` for A (except `backend/data/masks/`), `frontend/` for B, `terrain/` and `backend/data/masks/` for C.
+- Make small PRs into `main`, and have one teammate glance at each before it merges. Pull `main` at least once an hour.
+- The JSON formats in "Shared contracts" are the agreement between lanes. If one has to change, say so in team chat first, and update the README in the same PR.
+
+### Schedule
+
+| Time (ET) | A: data and backend | B: frontend | C: terrain (Lucas) |
+| --- | --- | --- | --- |
+| 11:00–12:00 | `sites.json` with real Quickmap coordinates, then the Horizons fetch | On arrival: Vite scaffold, plus mock JSON copied from the README samples | Download the coarse south-pole DEM, set up `rasterio` and `pyproj`, crop around the sites |
+| **12:00 sync (5 min)** | Shares the final site IDs | | Keys mask files by those IDs |
+| 12:00–2:00 | `metrics.py` and the `/sites`, `/ephemeris` and `/compare` endpoints | Site and date picker, plus the sky plot, on mock data | Ray-cast a single site and check the rotation against Quickmap |
+| 2:00–4:00 | Merges a working backend with a flat horizon | Switches from mock data to the real API | Runs every site, writes `backend/data/masks/{site_id}.json`, opens a PR |
+| **4:00 sync: first end-to-end app** | It runs, ugly but real | | |
+| 4:00–6:00 | Wires up `elevation > mask(azimuth)`; exposes both flat and terrain numbers | Timeline, metric cards, compare mode, flat/terrain toggle | Validates a second site, then starts the README limitations section and the "Explain it" text |
+| **6:00 sync: feature freeze** | After this, only fixes go in | | |
+| 6:00–8:00 | Deploys the backend | Deploys the frontend, records the demo | Finishes the README and the submission, checks the demo against the demo script |
+| **8:00** | **Submit** | | |
+
+### If you fall behind
+
+- If the masks aren't solid by 4:00, ship the flat horizon, label it clearly, and list terrain as the next step in this README.
+- Cut stretch features in this order: map view, then animation, then the mast-height slider. Never cut compare mode.
+
 ## Code starter
 
 Three small modules cover the whole backend. This is untested starter code, so run the sanity checks in the schedule before you build on it.
