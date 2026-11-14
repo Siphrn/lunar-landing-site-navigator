@@ -15,10 +15,7 @@ export default function WindowFinder({ cmp, minHours, onMinHours, onLand }: Prop
   const earliest = rows.reduce<string | null>((a, { w }) => (w && (!a || w.start < a) ? w.start : a), null);
   return (
     <div className="panel finder">
-      <p className="muted small">
-        When can we land with <b>sunlight for power and Earth in view for radio</b> for at least…
-      </p>
-      <div className="row">
+      <div className="fields">
         <div className="seg" role="group" aria-label="Minimum window">
           {PRESETS.map((h) => (
             <button type="button" key={h} className={minHours === h ? "on" : ""} onClick={() => onMinHours(h)}>

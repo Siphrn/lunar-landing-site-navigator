@@ -1,8 +1,13 @@
-/** Plain-language panel for students and the public. */
-export default function Explain() {
+/** Plain-language panel for students and the public, opened from the header. */
+export default function Explain({ onClose }: { onClose: () => void }) {
   return (
-    <details className="panel explain">
-      <summary>New to this? How to read the page</summary>
+    <section className="panel explain" aria-label="How to read this page">
+      <div className="explain-head">
+        <h2>How to read this page</h2>
+        <button type="button" className="ghost" onClick={onClose} aria-label="Close">
+          Close ✕
+        </button>
+      </div>
       <div className="explain-body">
         <p>
           <b>Why the south pole is tricky.</b> Near the Moon's south pole the Sun never climbs high. It circles around
@@ -37,6 +42,6 @@ export default function Explain() {
           radio stay on.
         </p>
       </div>
-    </details>
+    </section>
   );
 }

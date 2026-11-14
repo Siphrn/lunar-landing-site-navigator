@@ -31,6 +31,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [zoom, setZoom] = useState(true);
+  const [showHelp, setShowHelp] = useState(false);
   const [minHours, setMinHours] = useState(72);
   const [cursor, setCursor] = useState(-1); // index into the shared time axis
   const [playing, setPlaying] = useState(false);
@@ -152,22 +153,34 @@ export default function App() {
   return (
     <>
       <header className="top">
-        <div>
+        <div className="hero">
+          <p className="eyebrow">NASA Space Apps 2026 · Lunar south pole</p>
           <h1>Lunar Landing Site Navigator</h1>
-          <p className="muted">When does a south-pole site have sunlight for power and Earth in view for radio?</p>
+          <p className="lede">
+            Compare landing sites in seconds: when is there <span className="sun-t">sunlight for power</span> and{" "}
+            <span className="earth-t">Earth in view for radio</span>?
+          </p>
+          <div className="hero-meta">
+            <button type="button" className="ghost" onClick={() => setShowHelp((v) => !v)} aria-expanded={showHelp}>
+              {showHelp ? "Hide the guide" : "New here? How to read this"}
+            </button>
+            {source === "mock" && <span className="tag warn">Mock data: numbers are not real</span>}
+            {source === "snapshot" && (
+              <span
+                className="tag info"
+                title="Saved answers from the real API, computed in your browser. No backend needed."
+              >
+                Offline snapshot · {snapRange ? `${snapRange.min} to ${snapRange.max}` : "real data"}
+              </span>
+            )}
+            {source === "live" && <span className="tag live">Live data</span>}
+          </div>
         </div>
-        {source === "mock" && <span className="tag warn">Mock data: numbers are not real</span>}
-        {source === "snapshot" && (
-          <span
-            className="tag info"
-            title="Saved answers from the real API, computed in your browser. No backend needed."
-          >
-            Offline snapshot of real data{snapRange ? ` · ${snapRange.min} to ${snapRange.max}` : ""}
-          </span>
-        )}
       </header>
 
       <main>
+        {showHelp && <Explain onClose={() => setShowHelp(false)} />}
+
         <div className="top-grid">
           <Controls
             sites={sites}
@@ -185,17 +198,21 @@ export default function App() {
 
         {error && <p className="error panel">{error}</p>}
 
-        <Explain />
-
         {cmp && (
           <>
             <section>
-              <h2>Comparison</h2>
+              <div className="section-head">
+                <h2>Comparison</h2>
+                <span className="section-sub">Best in each column highlighted</span>
+              </div>
               <CompareTable cmp={cmp} requested={query?.horizon ?? "terrain"} requestedMast={query?.mastM ?? 0} />
             </section>
 
             <section>
-              <h2>Best landing window</h2>
+              <div className="section-head">
+                <h2>Best landing window</h2>
+                <span className="section-sub">Sun and Earth both up, for at least…</span>
+              </div>
               <WindowFinder cmp={cmp} minHours={minHours} onMinHours={setMinHours} onLand={landAt} />
             </section>
 
@@ -204,14 +221,26 @@ export default function App() {
                 <h2>Sky and timeline</h2>
                 <label className="toggle">
                   <input type="checkbox" checked={zoom} onChange={(e) => setZoom(e.target.checked)} />
-                  Zoom on the horizon
+                  Zoom to horizon
                 </label>
               </div>
-              <p className="muted small">
-                Sky dome: north at top, east to the right, centre = straight overhead. Shaded band = terrain blocking
-                the sky. Markers show the Sun (●) and Earth (◆) at the time on the slider (red line on the timeline;
-                filled = visible, hollow = hidden). The dotted line is the landing time. Click a timeline to jump there.
-              </p>
+              <ul className="legend" aria-label="Chart legend">
+                <li>
+                  <i className="sw sun" /> Sun
+                </li>
+                <li>
+                  <i className="sw earth" /> Earth
+                </li>
+                <li>
+                  <i className="sw terrain" /> Terrain
+                </li>
+                <li>
+                  <i className="sw dotted" /> Hidden
+                </li>
+                <li>
+                  <i className="sw now" /> Slider time
+                </li>
+              </ul>
               {times.length > 0 && cursor >= 0 && (
                 <Scrubber
                   times={times}
@@ -246,8 +275,9 @@ export default function App() {
       </main>
 
       <footer>
-        Ephemerides: NASA/JPL Horizons. Terrain: LRO LOLA elevation models via NASA PGDA. Built for NASA Space Apps
-        Challenge 2026.
+        <span>Sun and Earth positions: NASA/JPL Horizons</span>
+        <span>Terrain: LRO LOLA elevation models, NASA PGDA</span>
+        <span>Built for the NASA Space Apps Challenge 2026</span>
       </footer>
     </>
   );

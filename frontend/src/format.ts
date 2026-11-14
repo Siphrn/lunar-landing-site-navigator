@@ -1,11 +1,11 @@
 import type { SiteMetrics, Window } from "./types";
 
 export const COLORS = {
-  sun: "#e8930c",
-  earth: "#2f6fdb",
-  both: "#16a34a",
-  terrain: "#8b6b4a",
-  off: "#e6e8ec",
+  sun: "#f59e0b",
+  earth: "#2563eb",
+  both: "#10b981",
+  terrain: "#a07d5a",
+  off: "#eef0f5",
 };
 
 /** "41 h (1.7 d)" for longer spans, "12 h" for short ones. */
@@ -27,11 +27,11 @@ export type MetricKey = keyof Pick<
 
 export const METRIC_COLUMNS: { key: MetricKey; label: string; better: "high" | "low"; fmt: (v: number) => string }[] = [
   { key: "pct_sunlit", label: "% sunlit", better: "high", fmt: (v) => `${v}%` },
-  { key: "longest_dark_h", label: "Longest dark", better: "low", fmt: hours },
-  { key: "pct_earth", label: "% Earth in view", better: "high", fmt: (v) => `${v}%` },
-  { key: "longest_blackout_h", label: "Longest comms blackout", better: "low", fmt: hours },
+  { key: "longest_dark_h", label: "Longest night", better: "low", fmt: hours },
+  { key: "pct_earth", label: "% Earth", better: "high", fmt: (v) => `${v}%` },
+  { key: "longest_blackout_h", label: "Longest blackout", better: "low", fmt: hours },
   { key: "pct_both", label: "% Sun + Earth", better: "high", fmt: (v) => `${v}%` },
-  { key: "max_sun_el_deg", label: "Max Sun elevation", better: "high", fmt: (v) => `${v}°` },
+  { key: "max_sun_el_deg", label: "Peak Sun", better: "high", fmt: (v) => `${v}°` },
 ];
 
 /** Best value per column across the rows (only meaningful with 2+ rows). */
@@ -45,8 +45,15 @@ export function bestValues(rows: SiteMetrics[]): Partial<Record<MetricKey, numbe
   return out;
 }
 
-export function fmtUtc(iso: string): string {
-  return iso.replace("T", " ").replace(/:00Z$/, " UTC").replace(/Z$/, " UTC");
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** "2026-12-15T05:00:00Z" -> "Dec 15, 05:00 UTC", or "Dec 15, 2026 · 05:00 UTC" with the year. */
+export function fmtUtc(iso: string, withYear = false): string {
+  const d = new Date(iso);
+  const hh = String(d.getUTCHours()).padStart(2, "0");
+  const mm = String(d.getUTCMinutes()).padStart(2, "0");
+  const day = `${MONTHS[d.getUTCMonth()]} ${d.getUTCDate()}`;
+  return withYear ? `${day}, ${d.getUTCFullYear()} · ${hh}:${mm} UTC` : `${day}, ${hh}:${mm} UTC`;
 }
 
 /** First window (in time order) where Sun AND Earth stay up for at least `min` hours. */

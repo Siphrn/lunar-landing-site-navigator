@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Annotation, Data } from "plotly.js";
 import Plot from "../Plot";
+import { THEME } from "../theme";
 import { polarXY, type Basemap } from "../geo";
 import type { Site } from "../types";
 
@@ -29,7 +30,7 @@ function useBasemap(): Basemap | null {
 function graticule(): { data: Data[]; notes: Partial<Annotation>[] } {
   const data: Data[] = [];
   const notes: Partial<Annotation>[] = [];
-  const line = { color: "rgba(30,41,59,0.35)", width: 1 };
+  const line = { color: "rgba(15,23,42,0.18)", width: 1 };
   for (const lat of [-82, -84, -86, -88]) {
     const pts = Array.from({ length: 181 }, (_, i) => polarXY(lat, i * 2));
     data.push({
@@ -47,8 +48,8 @@ function graticule(): { data: Data[]; notes: Partial<Annotation>[] } {
       y: lab.y,
       text: `${-lat}°S`,
       showarrow: false,
-      font: { size: 10, color: "#334155" },
-      bgcolor: "rgba(255,255,255,0.7)",
+      font: { size: 10, color: THEME.muted },
+      bgcolor: "rgba(255,255,255,0.8)",
     });
   }
   for (let lon = 0; lon < 360; lon += 30) {
@@ -69,8 +70,8 @@ function graticule(): { data: Data[]; notes: Partial<Annotation>[] } {
       y: lab.y,
       text: `${lon}°E`,
       showarrow: false,
-      font: { size: 10, color: "#334155" },
-      bgcolor: "rgba(255,255,255,0.7)",
+      font: { size: 10, color: THEME.muted },
+      bgcolor: "rgba(255,255,255,0.8)",
     });
   }
   return { data, notes };
@@ -105,7 +106,7 @@ export default function MapView({ sites, selected, onToggle, full }: Props) {
 
   const marker = (on: boolean) => ({
     size: on ? 15 : 11,
-    color: on ? "#1d4ed8" : "#ffffff",
+    color: on ? THEME.accent : "#ffffff",
     line: { color: on ? "#ffffff" : "#1e293b", width: 2 },
   });
   const pts = placeLabels(polar.map((s) => ({ s, ...polarXY(s.lat, s.lon_e) }))).map((p) => ({
@@ -125,7 +126,7 @@ export default function MapView({ sites, selected, onToggle, full }: Props) {
         text: pts.filter((p) => p.on === on).map((p) => (p.crowded && !on ? "" : p.s.name)),
         customdata: pts.filter((p) => p.on === on).map((p) => p.s.id),
         textposition: pts.filter((p) => p.on === on).map((p) => p.pos),
-        textfont: { size: 10.5, color: on ? "#1e3a8a" : "#0f172a" },
+        textfont: { size: 10.5, color: on ? "#1e3a8a" : "#0f172a", family: THEME.font },
         marker: { ...marker(on), symbol: "circle" },
         hovertext: pts
           .filter((p) => p.on === on)
@@ -145,9 +146,7 @@ export default function MapView({ sites, selected, onToggle, full }: Props) {
     <div className="panel map">
       <div className="map-head">
         <b>Map of the south pole</b>
-        <span className="muted small">
-          Click a site to add or remove it. 0°E (the Earth-facing side) is at the top.
-        </span>
+        <span className="muted small">Tap a site to add or remove it · Earth-facing side at top</span>
       </div>
       <Plot
         data={data}
@@ -169,7 +168,7 @@ export default function MapView({ sites, selected, onToggle, full }: Props) {
               arrowhead: 0,
               ax: 22,
               ay: 18,
-              font: { size: 10 },
+              font: { size: 10, color: THEME.muted },
             },
           ],
           images: basemap
@@ -184,11 +183,11 @@ export default function MapView({ sites, selected, onToggle, full }: Props) {
                   sizey: basemap.y_max_m - basemap.y_min_m,
                   sizing: "stretch",
                   layer: "below",
-                  opacity: 0.65, // keep site labels readable on top of the relief
+                  opacity: 0.6, // soften the relief so site labels stay readable
                 },
               ]
             : [],
-          plot_bgcolor: basemap ? "#ffffff" : "#eef1f5",
+          plot_bgcolor: "#eef1f6",
           paper_bgcolor: "rgba(0,0,0,0)",
           margin: { t: 4, l: 4, r: 4, b: 4 },
           dragmode: "pan",
@@ -203,12 +202,7 @@ export default function MapView({ sites, selected, onToggle, full }: Props) {
         style={{ width: "100%", aspectRatio: "1 / 1", maxHeight: 560 }}
         config={{ displayModeBar: false, scrollZoom: true, responsive: true }}
       />
-      <p className="muted small map-foot">
-        {basemap
-          ? `Shaded relief: ${basemap.credit ?? "LOLA south-pole DEM, NASA PGDA"}. `
-          : "Shaded relief not built yet (see frontend/README). "}
-        Scroll to zoom, drag to pan. Control sites near the equator are not shown.
-      </p>
+      <p className="muted small map-foot">{basemap ? "Relief: LOLA, NASA PGDA · " : ""}Scroll to zoom, drag to pan</p>
     </div>
   );
 }
