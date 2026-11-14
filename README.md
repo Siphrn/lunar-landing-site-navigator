@@ -455,6 +455,16 @@ Who is who: **Lucas is Person C** (terrain). Person A has started on the backend
 - Make small PRs into `main`, and have one teammate glance at each before it merges. Pull `main` at least once an hour.
 - The JSON formats in "Shared contracts" are the agreement between lanes. If one has to change, say so in team chat first, and update the README in the same PR.
 
+### Status tracking (required)
+
+[`STATUS.md`](STATUS.md) shows where everyone is right now: status, current task, branch, blockers, next step and a short log. **Everyone must keep their own section of it up to date:**
+
+- Update it when you **start** a task, **finish** a task, or get **blocked**, and at every sync (12:00, 4:00, 6:00).
+- Change the "At a glance" row, your own section, and add one line to the top of the Log.
+- Edit only your own row and section, so updates never conflict.
+- `STATUS.md` updates are the one exception to the PR rule: commit them straight to `main` (`git pull`, edit, `git commit -m "status: C ray-casting first site"`, `git push`), so they show up right away.
+- Before starting work or asking someone for something, read `STATUS.md` first.
+
 ### Schedule
 
 | Time (ET) | A: data and backend | B: frontend | C: terrain (Lucas) |
