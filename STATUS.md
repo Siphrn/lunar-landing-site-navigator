@@ -9,7 +9,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
 | A | Data and backend | working | `sites.json` + Horizons fetch | `backend/...` | No | Sat 11:04 |
-| B | Frontend | not started | Vite scaffold + mock JSON (first task) | — | No | Sat 11:04 |
+| B | Frontend | working | Site/date picker + sky plot on mock data | `frontend/scaffold` (PR #5), `frontend/ui` | No | Sat 11:25 |
 | C (Lucas) | Terrain horizon masks | working | Download coarse DEM, set up rasterio/pyproj, crop around sites | `terrain/...` | No | Sat 11:04 |
 
 ---
@@ -27,14 +27,14 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 ## B: frontend
 
-- **Status:** not started
-- **Current task:** (on arrival) Vite scaffold + mock JSON copied from the README samples
-- **Branch / PR:** —
-- **Done so far:** —
-- **Next:** site and date picker, sky plot on mock data
+- **Status:** working
+- **Current task:** site multi-select, date range picker and sky plot on mock data
+- **Branch / PR:** `frontend/scaffold` ([PR #5](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/5), needs a review); next work on `frontend/ui`
+- **Done so far:** Vite + React + TS scaffold, contract types, `api.ts` (mocks unless `VITE_API_URL` is set), mock JSON for haworth / malapert / nobile_rim_1 / apollo11
+- **Next:** timeline strip, metric cards, compare table; switch to the real API at 2:00
 - **Blocked on:** nothing
-- **Needs from others:** nothing until the 2:00–4:00 switch to the real API
-- **Updated:** Sat 11:04 ET
+- **Needs from others:** A: final site IDs at 12:00, and a look at `frontend/src/mock/` to confirm it matches what the API will return. Someone: review PR #5
+- **Updated:** Sat 11:25 ET
 
 ## C: terrain horizon masks (Lucas)
 
@@ -53,4 +53,5 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 11:25 · B · Frontend scaffold, contract types, mocks and `api.ts` done; PR #5 open. Starting picker + sky plot.
 - Sat 11:04 · All · Status file created. A working on backend, C starting terrain, B starting soon.
