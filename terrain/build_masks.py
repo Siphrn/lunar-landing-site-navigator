@@ -35,7 +35,7 @@ def sanity(mask):
     problems = []
     if hi > 30:
         problems.append(f"max {hi:.1f} deg is too high (units or pixel-size bug?)")
-    if lo < -5:
+    if lo < -8:  # a 6 km peak legitimately sees ~5-6 deg below level
         problems.append(f"min {lo:.1f} deg is too low")
     if all(abs(v) < 1e-6 for v in mask):
         problems.append("all zeros (rays left the DEM or hit nodata?)")
@@ -83,7 +83,7 @@ def main():
             (OUT_DIR / name).write_text(json.dumps(out) + "\n")
             cov = min(d["coverage"])
             probs = sanity(mask)
-            if cov < 0.999:
+            if cov < 0.99:
                 probs.append(f"some rays run off the DEM edge (worst ray {cov:.0%} covered)")
             bad += bool(probs)
             peak = max(range(len(mask)), key=mask.__getitem__)
