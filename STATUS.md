@@ -8,40 +8,36 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
-| A | Data and backend | done | Backend deployed: https://lunar-site-navigator-api.onrender.com. Waiting on C to rebuild 2 masks, then final check | `main` | Waiting on C (2 masks) | Sat 12:03 |
-| B | Frontend | in review | All lane-B features done in PR #11; final snapshot + demo after A/C move 2 sites | `frontend/ui` (PR #11) | Waiting: PR #11 review, Pages setting, haworth/malapert move | Sat 12:05 |
+| A | Data and backend | done | Backend live and current (masks #18). Available for fixes | `main` | No | Sat 12:17 |
+| B | Frontend | done | Site live: https://siphrn.github.io/nasaSpaceAppChallenge/ ; demo video recorded | `main` | No | Sat 12:18 |
 | C (Lucas) | Terrain horizon masks | working | All masks current (#18); Quickmap checks done (#19); next: final README + submission at 6:00 | `claude/project-thread-mabu61` | No | Sat 12:10 |
 
 ---
 
 ## A: data and backend
 
-- **Status:** done; waiting on C to rebuild 2 masks, then a final check on the live URL
-- **Current task:** waiting on C (masks for haworth and malapert_massif)
-- **Branch / PR:** #6, #7, #8, #9, #10, #13, #16, #17 all merged
-- **Done so far:** **Backend deployed: <https://lunar-site-navigator-api.onrender.com>** (Render free plan, auto-deploys from `main`, `HORIZONS_OFFLINE=1`). Checked on the public URL: demo queries, `mast_m=10`, 400/502, CORS. URL is in the README. Backend: `sites.json`, `horizons.py` + offline cache, `metrics.py`, `app.py` (terrain + `mast_m`), 31 tests. Terrain gate passes. **#17 (12:10):** moved `haworth` to -86.9737, 335.6129 (inside the official region) and `malapert_massif` to -86.0187, 2.2013 (out of the summit crater), as C asked; cache refetched
-- **Next:** when C's new masks are on main, Render redeploys automatically; I rerun the terrain gate on the live URL
-- **Blocked on:** **C:** please rebuild the 0 m and `_h10` masks for `haworth` and `malapert_massif` (sites moved in #17)
-- **Needs from others:** **B: backend URL for `VITE_API_URL` is `https://lunar-site-navigator-api.onrender.com`** (CORS open). Free plan: the first request after 15 idle minutes takes ~1 min to wake, so open it once before the demo. C: thanks for the profiles. nobile_rim_1 stays where it is for now (the runner-up point C suggested); flag it if Quickmap shows it is off the Nobile rim
-- **Updated:** Sat 12:03 ET
+- **Status:** done
+- **Current task:** none; available for fixes until 8:00
+- **Branch / PR:** #6, #7, #8, #9, #10, #13, #16, #17, #21 all merged
+- **Done so far:** **Backend live: <https://lunar-site-navigator-api.onrender.com>**, now serving latest main `39db743` (#17 sites + #18 masks). **Terrain gate rerun on the live URL (12:20), passes:** Malapert 100% sunlit with terrain (C's check agrees), Haworth 60.7% sun / 21.1% both; the 10 m mast never lowers any number. Everything else as before: `sites.json`, `horizons.py` + offline cache, `metrics.py`, `app.py` (terrain + `mast_m`), 31 tests, URL in README
+- **Important:** the Render service does **not** redeploy on push (not connected to GitHub). After anything in `backend/` merges (sites, cache, **masks**), it needs a manual deploy: tell A, or Render dashboard > Manual Deploy. Steps in `backend/WORKFLOW.md`
+- **Next:** redeploy if anything in `backend/` changes; help with the demo
+- **Blocked on:** nothing
+- **Needs from others:** C: if a mask or site changes again, tell A so the live backend gets redeployed. B: cold start is about 1 min on the free plan (your fallback covers it)
+- **Updated:** Sat 12:17 ET
 
 ---
 
 ## B: frontend
 
-- **Status:** in review. Every lane-B feature is built and tested; only refreshes and deploy remain
-- **Current task:** waiting on the items below, then refresh the offline snapshot, deploy, and record the final demo
-- **Branch / PR:** `frontend/ui`, [PR #11](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/11). Includes `.github/workflows/frontend-pages.yml`
-- **Done so far:** all MVP features + every stretch feature (window finder, explain panel, animation scrubber, map with C's relief, **mast switch** using A's `mast_m`). **Offline snapshot:** the site works with no backend for 2026-11-17 to 2027-01-13 (identical to the live API on 60 random queries, incl. mast). **GitHub Pages deploy** workflow. **Scripted demo video** (`frontend/scripts/record_demo.cjs`; draft recorded)
-- **Next:** (1) once PR #11 is merged and Pages is on, check the live site on desktop + phone; (2) after A/C move haworth + malapert_massif, rerun `npm run snapshot` and re-record the demo; (3) if A gets a backend URL, set it as a repo variable
-- **Blocked on:** nothing I can do more on without the items below
-- **Needs from others:**
-  - **Anyone: review + merge [PR #11](https://github.com/Siphrn/nasaSpaceAppChallenge/pull/11).** Only `frontend/` plus one new workflow file.
-  - **Repo admin (Siphrn), after #11 merges: Settings → Pages → Build and deployment → Source: "GitHub Actions".** The site then publishes to `https://siphrn.github.io/nasaSpaceAppChallenge/` on every push to `main`. No account or backend needed: it runs on the snapshot.
-  - **A + C: ping B when haworth + malapert_massif are moved and their masks rebuilt** (C's request above). I then refresh the snapshot so the deployed numbers match, and re-record the demo.
-  - **A (optional): backend URL.** No longer required for the demo. If you deploy, add the repo variable `VITE_API_URL` (Settings → Secrets and variables → Actions → Variables) and re-run the "Frontend to GitHub Pages" workflow; the site then uses the live API and falls back to the snapshot if it's down.
-  - **C (for the README/submission):** the demo story that is true in the data: landing at Mons Mouton on Dec 15 gives ~15 days of sun and Earth never sets; landing on Dec 29 instead, the Sun sets ~32 h after landing. Month-long % numbers barely change with a two-week shift (any 30-day window covers a full lunar day), so don't claim the table "re-ranks".
-- **Updated:** Sat 12:05 ET
+- **Status:** done
+- **Live site:** **<https://siphrn.github.io/nasaSpaceAppChallenge/>** (Pages run #3: tests, build and deploy all passed). It calls A's backend and falls back to the built-in snapshot if Render is asleep
+- **Branch / PR:** #5, #11 and #20 merged. Nothing open
+- **Done:** every MVP + stretch feature, mast switch, offline snapshot (matches the API), Pages deploy, demo video (about 69 s, captions checked against the data; B has the file)
+- **Next:** on call for fixes until the 6:00 feature freeze. If sites or masks change again: `cd frontend && npm run snapshot` (with the backend running) and push
+- **Blocked on:** nothing
+- **Needs from others:** everyone: open the live link once on a phone and tell B if anything looks off. C: tell B where the demo video should go for the submission
+- **Updated:** Sat 12:18 ET
 
 ## C: terrain horizon masks (Lucas)
 
@@ -60,6 +56,11 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 12:21 · C · Pages is on (Lucas set Source: GitHub Actions). Workflow run #3 succeeded; site: https://siphrn.github.io/nasaSpaceAppChallenge/ . Also merged B's #20 (demo caption fix).
+- Sat 12:18 · B · Frontend live at https://siphrn.github.io/nasaSpaceAppChallenge/ (Pages run #3 green). Lane B done.
+- Sat 12:17 · A · Redeployed backend with #17/#18 (Render doesn't redeploy on push; docs fixed in #21). Terrain gate passes on the live URL. Lane A done.
+- Sat 12:14 · B · Frontend merged (#11). Pages run #1: build OK, deploy failed only because Pages wasn't on yet; needs a re-run. Snapshot refreshed for #17/#18; cold-start fallback added; PR #20 (demo caption).
+- Sat 12:13 · C · Merged B's PR #11 at Lucas's request. Lucas is turning on Settings → Pages → Source: GitHub Actions; C re-runs the Pages workflow after. Haworth + malapert_massif masks are rebuilt (#18), so B can refresh the snapshot.
 - Sat 12:10 · C · #18: masks rebuilt for A's moved haworth + malapert_massif. #19: Nobile Rim 1 checked inside its official Quickmap region. Nobody waiting on C.
 - Sat 12:05 · B · PR #11 has every frontend feature + mast switch, offline snapshot, Pages deploy, demo recorder. Waiting on: PR #11 review, Pages setting, haworth/malapert move.
 - Sat 12:03 · A · Backend deployed: https://lunar-site-navigator-api.onrender.com (B: use as VITE_API_URL). Moved haworth + malapert_massif (#17); waiting on C to rebuild those 2 masks.
