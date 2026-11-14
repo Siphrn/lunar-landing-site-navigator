@@ -94,7 +94,9 @@ If I am more than 30 minutes behind at any sync, I say so in `STATUS.md` and tea
 | 4:00–5:30 | C | Confirmation that `horizon=terrain` reads their files |
 | ~7:00 | B | Deployed backend URL |
 
-## Deploy (ready; needs someone with a Render or Railway account)
+## Deploy
+
+**Deployed:** <https://lunar-site-navigator-api.onrender.com> (Render, free plan, auto-deploys from `main` on every push, settings as below).
 
 The backend serves only from the committed cache when `HORIZONS_OFFLINE=1`, so the deployed app never calls Horizons. Dates outside Nov 17 2026 to Jan 14 2027 return HTTP 502 with a clear message.
 
