@@ -8,7 +8,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
-| A | Data and backend | done | Flat + terrain backend merged (PR #7); next: help B switch to the real API | `main` | No | Sat 11:37 |
+| A | Data and backend | blocked | Waiting on C: 4 masks to rebuild for moved sites. Backend done; deploy ready | `main` | Yes: waiting on C's mask rebuild, and a hosting account for deploy | Sat 11:47 |
 | B | Frontend | working | Site/date picker + sky plot on mock data | `frontend/scaffold` (PR #5), `frontend/ui` | No | Sat 11:25 |
 | C (Lucas) | Terrain horizon masks | working | Masks merged (#4); validation + better site points for A | — | No | Sat 11:46 |
 
@@ -16,14 +16,14 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 ## A: data and backend
 
-- **Status:** done (backend merged to main)
-- **Current task:** available to help B switch from mocks to the real API
-- **Branch / PR:** PR #6 (sites.json) and PR #7 (backend) merged
-- **Done so far:** On main: `sites.json` (12 sites, IDs final), `metrics.py`, `horizons.py`, offline cache (all sites, Sun + Earth, Nov 17 2026 to Jan 14 2027 hourly), `app.py` with `/sites`, `/ephemeris`, `/compare`, and `horizon=terrain` reading `data/masks/` with flat fallback. 30 tests pass offline
-- **Next:** run it with B; check terrain numbers once C's masks are on main; deploy
-- **Blocked on:** nothing
-- **Needs from others:** B: the real site IDs differ from the mocks (`malapert` is `malapert_massif`); take IDs from `GET /sites`. To run: `cd backend && pip install -r requirements.txt && uvicorn app:app --reload`, then set `VITE_API_URL=http://localhost:8000`. `stop` is exclusive, the same as your mocks. C: once your masks are on main, `horizon=terrain` picks them up with no code change
-- **Updated:** Sat 11:37 ET
+- **Status:** waiting (on C for masks; deploy needs a Render/Railway account)
+- **Current task:** none until C's masks are rebuilt
+- **Branch / PR:** #6, #7, #8, #9, #10 all merged
+- **Done so far:** Backend complete on main: `sites.json`, `horizons.py` + offline cache, `metrics.py`, `app.py` (`/sites`, `/ephemeris`, `/compare`, terrain with flat fallback), 30 tests. PR #9 moved haworth, mons_mouton_plateau, nobile_rim_1 and de_gerlache_rim_2 to C's suggested points (nobile_rim_1 uses the runner-up that stays on the rim). Terrain gate checked against C's masks: terrain sunlight <= flat at every site; the Earth increases at mons_mouton and peak_near_cabeus_b are real (mask 2 to 4 deg below 0 toward Earth). Deploy config and steps in `backend/WORKFLOW.md` (Procfile, pinned requirements, `HORIZONS_OFFLINE=1`). **End-to-end check at 11:45:** B's `frontend/ui` against my local API in a headless browser: every call 200, no console errors, table, windows, sky plots and timelines all render with real numbers
+- **Next:** once C rebuilds the masks: rerun the terrain gate and confirm the demo trio. Then deploy at 6:00 and give B the URL
+- **Blocked on:** **C**: the masks on main for `haworth`, `mons_mouton_plateau`, `nobile_rim_1` and `de_gerlache_rim_2` were built at 16:31Z for the old points (Haworth is still on the crater floor: mean horizon 7.0 deg, never sunlit). Please rerun `python terrain/build_masks.py` (it reads the new `sites.json`) and merge. **Deploy**: needs someone with a Render or Railway account (steps in `backend/WORKFLOW.md`)
+- **Needs from others:** B: nothing; your app works against the real API (run: `cd backend && pip install -r requirements-dev.txt && uvicorn app:app --reload`, then `VITE_API_URL=http://localhost:8000 npm run dev`)
+- **Updated:** Sat 11:47 ET
 
 ---
 
@@ -55,6 +55,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 11:47 · A · Waiting on C to rebuild 4 masks (sites moved to C's suggested points in PR #9). Backend + B's frontend verified end to end. Deploy config ready.
 - Sat 11:46 · C · PR #4 (terrain masks) and PR #5 (B's frontend scaffold) merged to `main` at Lucas's request.
 - Sat 11:37 · A · Backend merged to main (PR #7). The flat-horizon API is ready for B; terrain reads C's masks once they're on main.
 - Sat 11:35 · A · sites.json merged to main (PR #6). Backend with flat + terrain API done on `backend/lane-a-workflow`; works offline.
