@@ -8,7 +8,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 | Person | Lane | Status | Current task | Branch | Blocked? | Updated (ET) |
 | --- | --- | --- | --- | --- | --- | --- |
-| A | Data and backend | in review | Flat + terrain API done on branch, not merged | `backend/lane-a-workflow` | No | Sat 11:35 |
+| A | Data and backend | done | Flat + terrain backend merged (PR #7); next: help B switch to the real API | `main` | No | Sat 11:37 |
 | B | Frontend | working | Site/date picker + sky plot on mock data | `frontend/scaffold` (PR #5), `frontend/ui` | No | Sat 11:25 |
 | C (Lucas) | Terrain horizon masks | in review | Masks rebuilt with A's site list, PR #4 | `claude/project-thread-mabu61` | No | Sat 11:41 |
 
@@ -16,14 +16,14 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 ## A: data and backend
 
-- **Status:** in review (backend complete on branch, not merged to main yet)
-- **Current task:** waiting to merge the backend; then help B switch to the real API
-- **Branch / PR:** `backend/sites` (PR #6, merged); `backend/lane-a-workflow` (metrics.py, horizons.py, cache, app.py)
-- **Done so far:** `sites.json` on main (12 sites, IDs final). On the branch: `metrics.py`, `horizons.py`, offline cache (all sites, Sun + Earth, Nov 17 2026 to Jan 14 2027 hourly), `app.py` with `/sites`, `/ephemeris`, `/compare`, `horizon=terrain` reading `data/masks/` with flat fallback. 30 tests pass offline
-- **Next:** merge the backend, run it with B, then deploy
+- **Status:** done (backend merged to main)
+- **Current task:** available to help B switch from mocks to the real API
+- **Branch / PR:** PR #6 (sites.json) and PR #7 (backend) merged
+- **Done so far:** On main: `sites.json` (12 sites, IDs final), `metrics.py`, `horizons.py`, offline cache (all sites, Sun + Earth, Nov 17 2026 to Jan 14 2027 hourly), `app.py` with `/sites`, `/ephemeris`, `/compare`, and `horizon=terrain` reading `data/masks/` with flat fallback. 30 tests pass offline
+- **Next:** run it with B; check terrain numbers once C's masks are on main; deploy
 - **Blocked on:** nothing
-- **Needs from others:** B: real site IDs differ from the mocks (`malapert` is `malapert_massif`); take IDs from `GET /sites`. To run the API: `cd backend && pip install -r requirements.txt && uvicorn app:app --reload`, then `VITE_API_URL=http://localhost:8000`. `stop` is exclusive (Dec 1 to Dec 31 gives 720 hours), same as your mocks. C: once your masks are on main, `horizon=terrain` picks them up with no code change
-- **Updated:** Sat 11:35 ET
+- **Needs from others:** B: the real site IDs differ from the mocks (`malapert` is `malapert_massif`); take IDs from `GET /sites`. To run: `cd backend && pip install -r requirements.txt && uvicorn app:app --reload`, then set `VITE_API_URL=http://localhost:8000`. `stop` is exclusive, the same as your mocks. C: once your masks are on main, `horizon=terrain` picks them up with no code change
+- **Updated:** Sat 11:37 ET
 
 ---
 
@@ -55,6 +55,7 @@ Status values: `not started` · `working` · `blocked` · `in review` · `done`
 
 Newest first. One line per event: time, person, what changed. Add to the top.
 
+- Sat 11:37 · A · Backend merged to main (PR #7). The flat-horizon API is ready for B; terrain reads C's masks once they're on main.
 - Sat 11:35 · A · sites.json merged to main (PR #6). Backend with flat + terrain API done on `backend/lane-a-workflow`; works offline.
 - Sat 11:41 · C · Masks rebuilt with A's site IDs/coords from PR #6 (PR #4). Flagged 4 points that sit in craters or on steep slopes.
 - Sat 11:32 · A · horizons.py + offline cache done (Dec 2026 ± 2 weeks, all sites). Starting app.py.
